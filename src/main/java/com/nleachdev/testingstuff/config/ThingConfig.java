@@ -16,4 +16,8 @@ public class ThingConfig {
     public SomePojo somePojo() {
         return new SomePojo(23, "who cares");
     }
+
+    public Long notAThing() {
+        return 20L;
+    }
 }

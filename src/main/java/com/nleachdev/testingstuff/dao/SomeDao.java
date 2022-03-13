@@ -13,7 +13,7 @@ public class SomeDao {
         this.somePojo = somePojo;
     }
 
-    public void doStuff() {
-        
+    public SomePojo getSomePojo() {
+        return somePojo;
     }
 }
