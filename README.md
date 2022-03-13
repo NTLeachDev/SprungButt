@@ -12,7 +12,7 @@ Forget @Autowired, it's really just @InjectThings
 
 Forget @Value, it's really (simplified) just @GetProperty (only field-level in ThingSetup classes, no constructor-property injection yet)
 
-Setter Injection? Never heard of her
+Setter Injection? Never heard of her, never will hear of her. NO.
 
 Constructor injection into config (ThingSetup) classes? Not yet
 
