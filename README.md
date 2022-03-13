@@ -10,11 +10,11 @@ Forget @Configuration, it's really just @ThingSetup
 
 Forget @Autowired, it's really just @InjectThings
 
-Forget @Value, it's really (simplified) just @GetProperty
+Forget @Value, it's really (simplified) just @GetProperty (only field-level in ThingSetup classes, no constructor-property injection yet)
 
 Setter Injection? Never heard of her
 
-Member variables injected into config classes? Not yet
+Constructor injection into config (ThingSetup) classes? Not yet
 
 Multiple Things of the same type? Not yet
 
