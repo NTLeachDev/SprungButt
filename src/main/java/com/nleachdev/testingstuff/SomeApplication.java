@@ -1,7 +1,7 @@
 package com.nleachdev.testingstuff;
 
 
-import com.nleachdev.sprungbutt.SprungButt;
+import com.nleachdev.sprungbutt.framework.SprungButt;
 import com.nleachdev.testingstuff.domain.SomePojo;
 import com.nleachdev.testingstuff.service.SomeService;
 import org.slf4j.Logger;

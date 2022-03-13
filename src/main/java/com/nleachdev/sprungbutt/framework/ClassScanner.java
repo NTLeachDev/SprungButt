@@ -1,4 +1,4 @@
-package com.nleachdev.sprungbutt;
+package com.nleachdev.sprungbutt.framework;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,10 +10,10 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
-public class ThingScanner {
-    private static final Logger logger = LoggerFactory.getLogger(ThingScanner.class);
+public class ClassScanner {
+    private static final Logger logger = LoggerFactory.getLogger(ClassScanner.class);
 
-    public static List<Class<?>> getClasses(final String packageName) throws IOException {
+    public static List<Class<?>> getClassesInPackage(final String packageName) throws IOException {
         final Enumeration<URL> resources = getPackageResources(packageName);
 
         final List<File> directories = new ArrayList<>();
@@ -23,12 +23,12 @@ public class ThingScanner {
         }
 
         return directories.stream()
-                .map(directory -> getClasses(directory, packageName))
+                .map(directory -> getClassesInPackage(directory, packageName))
                 .flatMap(List::stream)
                 .collect(toList());
     }
 
-    private static List<Class<?>> getClasses(final File directory, final String packageName) {
+    private static List<Class<?>> getClassesInPackage(final File directory, final String packageName) {
         if (!directory.exists()) {
             return new ArrayList<>();
         }
@@ -64,7 +64,7 @@ public class ThingScanner {
             return new ArrayList<>();
         }
 
-        return getClasses(file, packageName + "." + file.getName());
+        return getClassesInPackage(file, packageName + "." + file.getName());
     }
 
     private static Enumeration<URL> getPackageResources(final String packageName) throws IOException {
