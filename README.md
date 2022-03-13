@@ -6,6 +6,8 @@ Forget @Configuration, it's really just @ThingSetup
 
 Forget @Autowired, it's really just @InjectThings
 
+Forget @Value, it's really (simplified) just @GetProperty
+
 Setter Injection? Never heard of her
 
 Member variables injected into config classes? Not yet
