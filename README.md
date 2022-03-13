@@ -1,5 +1,9 @@
 # SprungButt
 
+Was bored so I figured I'd start a very derivative, basic, and poorly written Dependency Injection Framework.
+
+I'll probably never finish the functionality that I have in mind but whatever.
+
 Forget @Bean/@Component/@Service/@Repository, they're all just @Thing's
 
 Forget @Configuration, it's really just @ThingSetup
