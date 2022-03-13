@@ -20,5 +20,11 @@ public class SomeApplication {
         logger.info("Some Pojo has been returned: {}", somePojo);
 
         service.hitDB();
+
+        final String name = service.getName();
+        logger.info("String prop value injected for person.name: {}", name);
+
+        final Integer birthYear = service.getBirthYear();
+        logger.info("Integer prop value injected for person.birth.year: {}", birthYear);
     }
 }

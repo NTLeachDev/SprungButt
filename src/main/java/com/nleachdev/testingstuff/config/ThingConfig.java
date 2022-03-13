@@ -1,9 +1,9 @@
 package com.nleachdev.testingstuff.config;
 
+import com.nleachdev.sprungbutt.annotation.GetProperty;
 import com.nleachdev.sprungbutt.annotation.Thing;
 import com.nleachdev.sprungbutt.annotation.ThingSetup;
 import com.nleachdev.testingstuff.domain.SomePojo;
-import org.h2.jdbcx.JdbcDataSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
@@ -11,6 +11,12 @@ import javax.sql.DataSource;
 
 @ThingSetup
 public class ThingConfig {
+
+    @GetProperty("person.name")
+    public String name;
+
+    @GetProperty("person.birth.year")
+    public Integer birthYear;
 
     @Thing
     public NamedParameterJdbcTemplate namedTemplate() {
@@ -27,13 +33,18 @@ public class ThingConfig {
     }
 
     @Thing
-    public Integer someNumber() {
-        return 10;
+    public SomePojo somePojo() {
+        return new SomePojo(23, "who cares");
     }
 
     @Thing
-    public SomePojo somePojo() {
-        return new SomePojo(23, "who cares");
+    public String name() {
+        return name;
+    }
+
+    @Thing
+    public Integer birthYear() {
+        return birthYear;
     }
 
     public Long notAThing() {

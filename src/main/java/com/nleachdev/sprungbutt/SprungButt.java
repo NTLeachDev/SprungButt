@@ -1,5 +1,6 @@
 package com.nleachdev.sprungbutt;
 
+import com.nleachdev.sprungbutt.annotation.GetProperty;
 import com.nleachdev.sprungbutt.annotation.InjectThings;
 import com.nleachdev.sprungbutt.annotation.Thing;
 import com.nleachdev.sprungbutt.annotation.ThingSetup;
@@ -7,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -25,6 +28,43 @@ public class SprungButt {
         return instancePerThing.get(thingType);
     }
 
+    private static void propertyStuff(final Class<?> clazz, final Object instance) {
+        final List<Field> fields = Arrays.asList(clazz.getDeclaredFields());
+        fields.forEach(field -> {
+            if (field.getAnnotation(GetProperty.class) != null) {
+                final String[] value = field.getAnnotation(GetProperty.class).value().split(":");
+                final String propKey = value[0];
+
+                String valForField;
+                String defaultValue = null;
+
+                if (value.length == 2) {
+                    defaultValue = value[1];
+                }
+
+                try (final InputStream input = SprungButt.class.getClassLoader().getResourceAsStream("application.properties")) {
+                    final Properties properties = new Properties();
+                    if (input == null) {
+                        logger.warn("Unable to find application.properties");
+                        return;
+                    }
+
+                    properties.load(input);
+                    valForField = properties.getProperty(propKey);
+                    valForField = valForField == null
+                            ? defaultValue
+                            : valForField;
+                    logger.debug("Value of prop for {} classes {} field is {}", clazz.getSimpleName(), field.getName(), valForField);
+
+                    field.setAccessible(true);
+                    field.set(instance, castToFieldType(field.getType(), valForField));
+                } catch (final IOException | IllegalAccessException e) {
+                    logger.error("Error reading from properties file", e);
+                }
+            }
+        });
+    }
+
     public static void startEnvironment(final String packageName) throws IOException {
         logger.info("Starting SprungButt Environment");
         final LocalDateTime start = LocalDateTime.now();
@@ -36,6 +76,7 @@ public class SprungButt {
         getClasses(packageName).forEach(clazz -> {
             if (clazz.getAnnotation(ThingSetup.class) != null) {
                 final Object classInstance = getInstanceOfClass(clazz);
+                propertyStuff(clazz, classInstance);
                 Stream.of(clazz.getMethods())
                         .filter(method -> method.getAnnotation(Thing.class) != null)
                         .forEach(method -> {
@@ -191,5 +232,25 @@ public class SprungButt {
         });
 
         return thingsPerDepCost;
+    }
+
+    private static Object castToFieldType(final Class<?> fieldType, final String value) {
+        if (fieldType == int.class || fieldType == Integer.class) {
+            return Integer.parseInt(value);
+        }
+
+        if (fieldType == long.class || fieldType == Long.class) {
+            return Long.parseLong(value);
+        }
+
+        if (fieldType == boolean.class || fieldType == Boolean.class) {
+            return Boolean.parseBoolean(value);
+        }
+
+        if (fieldType == String.class) {
+            return value;
+        }
+
+        return null;
     }
 }
