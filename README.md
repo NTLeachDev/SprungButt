@@ -13,3 +13,5 @@ Member variables injected into config classes? Not yet
 Multiple Things of the same type? Not yet
 
 Proxy Based? Not yet, and even then, only when needed; there's not even AOP functionality to use proxies yet
+
+Will I force the use of Dynamic Proxies, and thereby force the use of interfaces for any AOP relevant stuff? Depends on how I feel
