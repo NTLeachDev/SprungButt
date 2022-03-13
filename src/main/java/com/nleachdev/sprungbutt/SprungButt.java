@@ -173,7 +173,7 @@ public class SprungButt {
             setupDepCostForThing(thing, depsForThing, depCostPerThing, depsPerThing);
         });
 
-        logger.info("depCostPerThing: {}", depCostPerThing);
+        logger.debug("depCostPerThing: {}", depCostPerThing);
 
         return groupThingsPerDepCost(depCostPerThing);
     }

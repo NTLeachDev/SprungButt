@@ -18,5 +18,7 @@ public class SomeApplication {
         final SomeService service = (SomeService) SprungButt.getThing(SomeService.class);
         final SomePojo somePojo = service.getSomePojo();
         logger.info("Some Pojo has been returned: {}", somePojo);
+
+        service.hitDB();
     }
 }
