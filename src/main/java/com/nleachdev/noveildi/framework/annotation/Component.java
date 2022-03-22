@@ -1,4 +1,4 @@
-package com.nleachdev.sprungbutt.annotation;
+package com.nleachdev.noveildi.framework.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,7 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.METHOD, ElementType.TYPE})
-public @interface Thing {
-    String thingName() default "";
+@Target(ElementType.TYPE)
+public @interface Component {
 }
