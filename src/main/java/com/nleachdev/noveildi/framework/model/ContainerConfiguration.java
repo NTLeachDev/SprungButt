@@ -1,13 +1,11 @@
 package com.nleachdev.noveildi.framework.model;
 
-import com.nleachdev.noveildi.framework.annotation.Component;
 import com.nleachdev.noveildi.framework.service.BasePackageResolver;
 import com.nleachdev.noveildi.framework.service.PackageResolver;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@Component
 public class ContainerConfiguration {
     private final Class<?> mainClass;
     private PackageResolver packageResolver;

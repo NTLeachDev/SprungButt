@@ -1,6 +1,5 @@
 package com.nleachdev.noveildi.framework.service;
 
-import com.nleachdev.noveildi.framework.annotation.Component;
 import com.nleachdev.noveildi.framework.exception.ClassScanningException;
 import com.nleachdev.noveildi.framework.util.FileUtils;
 import com.nleachdev.noveildi.framework.util.ReflectionUtils;
@@ -12,7 +11,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Component
 public class DirectoryClassScanner implements ClassScanner {
     private static final Logger logger = LoggerFactory.getLogger(DirectoryClassScanner.class);
 
