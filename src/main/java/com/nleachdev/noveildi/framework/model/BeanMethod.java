@@ -7,12 +7,14 @@ import java.util.StringJoiner;
 
 public class BeanMethod {
     private final String methodName;
-    private final Method instance;
+    private final Method method;
+    private final Class<?> returnType;
     private final Dependency[] dependencies;
 
-    public BeanMethod(final String methodName, final Method instance, final Dependency[] dependencies) {
+    public BeanMethod(final String methodName, final Method method, final Class<?> returnType, final Dependency[] dependencies) {
         this.methodName = methodName;
-        this.instance = instance;
+        this.method = method;
+        this.returnType = returnType;
         this.dependencies = dependencies;
     }
 
@@ -20,8 +22,12 @@ public class BeanMethod {
         return methodName;
     }
 
-    public Method getInstance() {
-        return instance;
+    public Method getMethod() {
+        return method;
+    }
+
+    public Class<?> getReturnType() {
+        return returnType;
     }
 
     public Dependency[] getDependencies() {
@@ -38,13 +44,14 @@ public class BeanMethod {
         }
         final BeanMethod that = (BeanMethod) o;
         return Objects.equals(methodName, that.methodName) &&
-                Objects.equals(instance, that.instance) &&
+                Objects.equals(method, that.method) &&
+                Objects.equals(returnType, that.returnType) &&
                 Arrays.equals(dependencies, that.dependencies);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(methodName, instance);
+        int result = Objects.hash(methodName, method, returnType);
         result = 31 * result + Arrays.hashCode(dependencies);
         return result;
     }
@@ -53,7 +60,8 @@ public class BeanMethod {
     public String toString() {
         return new StringJoiner(", ", BeanMethod.class.getSimpleName() + "[", "]")
                 .add("methodName='" + methodName + "'")
-                .add("instance=" + instance)
+                .add("instance=" + method)
+                .add("returnType=" + returnType)
                 .add("dependencies=" + Arrays.toString(dependencies))
                 .toString();
     }

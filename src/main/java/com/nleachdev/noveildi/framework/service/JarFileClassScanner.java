@@ -1,8 +1,8 @@
 package com.nleachdev.noveildi.framework.service;
 
 import com.nleachdev.noveildi.framework.exception.ClassScanningException;
+import com.nleachdev.noveildi.framework.util.BeanUtils;
 import com.nleachdev.noveildi.framework.util.FileUtils;
-import com.nleachdev.noveildi.framework.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class JarFileClassScanner implements ClassScanner {
         final String className = FileUtils.cleanToPackageFormat(jarEntry.getName());
         try {
             final Class<?> clazz = Class.forName(className);
-            return ReflectionUtils.classIsConcreteComponentType(clazz)
+            return BeanUtils.classIsConcreteComponentType(clazz)
                     ? clazz
                     : null;
         } catch (final ClassNotFoundException e) {

@@ -2,6 +2,6 @@ package com.nleachdev.noveildi.framework.model;
 
 public enum BeanType {
     COMPONENT,
-    CONFIGURATION,
-    CONFIGURATION_BEAN;
+    CONFIG_COMPONENT,
+    CONFIGURED_METHOD_BEAN;
 }

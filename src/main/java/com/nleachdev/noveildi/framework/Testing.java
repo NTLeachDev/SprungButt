@@ -5,13 +5,11 @@ import com.nleachdev.noveildi.framework.model.ContainerConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
-
 
 public class Testing {
     private static final Logger logger = LoggerFactory.getLogger(Testing.class);
 
-    public static void main(final String[] args) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+    public static void main(final String[] args) {
         final ContainerConfiguration config = ContainerConfiguration.getConfig(Testing.class);
         Container.getInstance().startContainer(config);
     }

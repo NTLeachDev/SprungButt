@@ -1,14 +1,7 @@
 package com.nleachdev.noveildi.framework.testing;
 
-import com.nleachdev.noveildi.framework.annotation.Component;
-import com.nleachdev.noveildi.framework.annotation.Inject;
+public interface TestingService {
+    void doSomeStuff();
 
-@Component
-public class TestingService {
-    private final TestingDependencyService dependencyService;
-
-    @Inject
-    public TestingService(final TestingDependencyService dependencyService) {
-        this.dependencyService = dependencyService;
-    }
+    Integer getANumber();
 }

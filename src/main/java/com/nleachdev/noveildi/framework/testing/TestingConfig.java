@@ -1,8 +1,9 @@
 package com.nleachdev.noveildi.framework.testing;
 
-import com.nleachdev.noveildi.framework.annotation.*;
+import com.nleachdev.noveildi.framework.annotation.Bean;
+import com.nleachdev.noveildi.framework.annotation.Config;
+import com.nleachdev.noveildi.framework.annotation.Get;
 
-@Component
 @Config
 public class TestingConfig {
 

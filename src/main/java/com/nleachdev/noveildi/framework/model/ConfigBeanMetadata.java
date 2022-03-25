@@ -2,20 +2,16 @@ package com.nleachdev.noveildi.framework.model;
 
 
 import java.util.Arrays;
-import java.util.Objects;
+import java.util.Set;
 import java.util.StringJoiner;
 
-public class ConfigBeanMetadata {
-    private final BeanMetadata beanMetadata;
+public class ConfigBeanMetadata extends BeanMetadata {
     private final BeanMethod[] beanMethods;
 
-    public ConfigBeanMetadata(final BeanMetadata beanMetadata, final BeanMethod[] beanMethods) {
-        this.beanMetadata = beanMetadata;
+    public ConfigBeanMetadata(final Class<?> type, final String beanName, final InjectionPoint injectionPoint,
+                              final BeanMethod[] beanMethods) {
+        super(type, beanName, injectionPoint, BeanType.CONFIG_COMPONENT);
         this.beanMethods = beanMethods;
-    }
-
-    public BeanMetadata getBeanMetadata() {
-        return beanMetadata;
     }
 
     public BeanMethod[] getBeanMethods() {
@@ -27,17 +23,19 @@ public class ConfigBeanMetadata {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ConfigBeanMetadata)) {
+            return false;
+        }
+        if (!super.equals(o)) {
             return false;
         }
         final ConfigBeanMetadata that = (ConfigBeanMetadata) o;
-        return Objects.equals(beanMetadata, that.beanMetadata) &&
-                Arrays.equals(beanMethods, that.beanMethods);
+        return Arrays.equals(beanMethods, that.beanMethods);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(beanMetadata);
+        int result = super.hashCode();
         result = 31 * result + Arrays.hashCode(beanMethods);
         return result;
     }
@@ -45,8 +43,13 @@ public class ConfigBeanMetadata {
     @Override
     public String toString() {
         return new StringJoiner(", ", ConfigBeanMetadata.class.getSimpleName() + "[", "]")
-                .add("beanMetadata=" + beanMetadata)
                 .add("beanMethods=" + Arrays.toString(beanMethods))
+                .add("type=" + type)
+                .add("beanName='" + beanName + "'")
+                .add("beanType=" + beanType)
+                .add("dependencyCost=" + dependencyCost)
+                .add("instance=" + instance)
+                .add("interfaces=" + interfaces)
                 .toString();
     }
 }
