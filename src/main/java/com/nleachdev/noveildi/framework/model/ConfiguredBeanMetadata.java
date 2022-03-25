@@ -1,5 +1,8 @@
 package com.nleachdev.noveildi.framework.model;
 
+import com.nleachdev.noveildi.framework.exception.BeanInstantiationException;
+
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
@@ -20,16 +23,21 @@ public class ConfiguredBeanMetadata extends Metadata {
     }
 
     @Override
-    protected Object createInstance(final Object... args) {
-        return null;
+    protected Object createInstance(final Object instance, final Object... args) throws BeanInstantiationException {
+        try {
+            return method.invoke(instance, args);
+        } catch (final IllegalAccessException | InvocationTargetException e) {
+            throw new BeanInstantiationException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Dependency[] getDependencies() {
+        return dependencies;
     }
 
     public Method getMethod() {
         return method;
-    }
-
-    public Dependency[] getDependencies() {
-        return dependencies;
     }
 
     @Override

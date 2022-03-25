@@ -1,5 +1,7 @@
 package com.nleachdev.noveildi.framework.model;
 
+import com.nleachdev.noveildi.framework.exception.BeanInstantiationException;
+
 import java.util.*;
 
 public abstract class Metadata implements Comparator<Metadata> {
@@ -17,7 +19,8 @@ public abstract class Metadata implements Comparator<Metadata> {
         interfaces = getInterfaces(type);
     }
 
-    protected abstract Object createInstance(final Object... args);
+    protected abstract Object createInstance(final Object instance, final Object... args) throws BeanInstantiationException;
+    public abstract Dependency[] getDependencies();
 
     private static Set<Class<?>> getInterfaces(final Class<?> clazz) {
         return new HashSet<>(Arrays.asList(clazz.getInterfaces()));

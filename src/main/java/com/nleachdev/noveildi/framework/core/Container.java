@@ -16,12 +16,12 @@ public enum Container {
     INSTANCE;
 
     private static final Logger logger = LoggerFactory.getLogger(Container.class);
+    private static final String CLASS_SCANNING_EXCEPTION_MSG = "Unable to setup ClassScanner instance for scannable package: %s";
     private static ContainerConfiguration config;
     private static final Map<BeanType, Set<Metadata>> metadataPerBeanType = new HashMap<>();
     private static final Map<String, Metadata> metadataPerBeanName = new HashMap<>();
     private static final Map<Class<?>, Set<String>> beanNamesPerType = new HashMap<>();
     private static final Map<Class<?>, Set<String>> beanNamesPerInterfaceType = new HashMap<>();
-
 
     public static Container getInstance() {
         return INSTANCE;
@@ -31,6 +31,7 @@ public enum Container {
         clear();
         config = providedConfig;
         setupBeanMetadata();
+        verifyDependencies();
     }
 
     private static void setupBeanMetadata() {
@@ -43,11 +44,19 @@ public enum Container {
         ).setupBeanMetadata(relevantClasses);
     }
 
+    private static void verifyDependencies() {
+        new DependencyVerifier(
+                metadataPerBeanName,
+                beanNamesPerType,
+                beanNamesPerInterfaceType
+        ).verifyDependencyExistence();
+    }
+
     private static Set<Class<?>> getRelevantClasses() {
         final ScannablePackage scannablePackage = config.getScannablePackage();
         final ClassScanner scanner = getClassScanner(scannablePackage.getPackageType());
         if (scanner == null) {
-            throw new ClassScanningException(String.format("Unable to setup ClassScanner instance for scannable package: %s", scannablePackage));
+            throw new ClassScanningException(String.format(CLASS_SCANNING_EXCEPTION_MSG, scannablePackage));
         }
         return scanner.getClasses(
                 scannablePackage.getPackageName(),

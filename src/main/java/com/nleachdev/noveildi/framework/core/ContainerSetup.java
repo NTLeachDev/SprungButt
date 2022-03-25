@@ -2,7 +2,6 @@ package com.nleachdev.noveildi.framework.core;
 
 import com.nleachdev.noveildi.framework.annotation.Bean;
 import com.nleachdev.noveildi.framework.annotation.Get;
-import com.nleachdev.noveildi.framework.exception.ClassScanningException;
 import com.nleachdev.noveildi.framework.exception.ConflictingBeanNameException;
 import com.nleachdev.noveildi.framework.model.*;
 import com.nleachdev.noveildi.framework.util.BeanUtils;
@@ -60,7 +59,7 @@ public class ContainerSetup {
     }
 
     private void trackBean(final Class<?> type, final String beanName, final BeanType beanType,
-                                  final Metadata metadata) {
+                           final Metadata metadata) {
         CollectionUtils.addToMapSet(metadataPerBeanType, beanType, metadata);
         CollectionUtils.addToMapSet(beanNamesPerType, type, beanName);
         if (metadataPerBeanName.containsKey(beanName)) {
