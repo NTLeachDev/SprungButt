@@ -2,6 +2,7 @@ package com.nleachdev.noveildi.framework.core;
 
 import com.nleachdev.noveildi.framework.exception.AmbiguousBeanDefinitionException;
 import com.nleachdev.noveildi.framework.exception.ChickenAndEggException;
+import com.nleachdev.noveildi.framework.exception.MissingBeanDefinitionException;
 import com.nleachdev.noveildi.framework.exception.MissingImplementationException;
 import com.nleachdev.noveildi.framework.model.Dependency;
 import com.nleachdev.noveildi.framework.model.Metadata;
@@ -36,6 +37,11 @@ public class DependencyVerifier {
         resolveDependencies();
         verifyDependencyHierarchies();
     }
+
+    public void resolveDependencies() {
+        metadataPerBeanName.forEach(this::resolveDependencies);
+    }
+
 
     private void verifyDependencyHierarchies() {
         metadataPerBeanName.values().forEach(
@@ -83,10 +89,6 @@ public class DependencyVerifier {
         dependencyNames.forEach(dependencyName -> verifyHierarchy(dependencyName, newParentBeanNames));
     }
 
-    public void resolveDependencies() {
-        metadataPerBeanName.forEach(this::resolveDependencies);
-    }
-
     private void resolveDependencies(final String beanName, final Metadata metadata) {
         final Dependency[] dependencies = metadata.getDependencies();
         if (dependencies == null || dependencies.length == 0) {
@@ -103,9 +105,7 @@ public class DependencyVerifier {
         final String dependencyName = dependency.getName();
         final Class<?> dependencyType = dependency.getType();
         if (namesForDepType == null || namesForDepType.isEmpty()) {
-            throw new MissingImplementationException(String.format(
-                    dependency.isInterfaceType() ? MISSING_IMPL_EXCEPTION_MSG : MISSING_BEAN_EXCEPTION_MSG,
-                    dependencyType, parentBeanName));
+            throwForMissingDep(dependencyType, parentBeanName, dependency.isInterfaceType());
         }
 
         if (namesForDepType.size() != 1 && !namesForDepType.contains(dependencyName)) {
@@ -144,6 +144,14 @@ public class DependencyVerifier {
         final String[] newArr = Arrays.copyOf(strArr, strArr.length + 1);
         newArr[strArr.length] = str;
         return newArr;
+    }
+
+    private void throwForMissingDep(final Class<?> dependencyType, final String parentBeanName, final boolean isInterface) {
+        if (isInterface) {
+            throw new MissingImplementationException(String.format(MISSING_IMPL_EXCEPTION_MSG, dependencyType, parentBeanName));
+        }
+
+        throw new MissingBeanDefinitionException(String.format(MISSING_BEAN_EXCEPTION_MSG, dependencyType, parentBeanName));
     }
 
 }
