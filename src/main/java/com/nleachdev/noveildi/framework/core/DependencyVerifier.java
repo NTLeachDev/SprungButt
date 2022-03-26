@@ -1,22 +1,25 @@
 package com.nleachdev.noveildi.framework.core;
 
 import com.nleachdev.noveildi.framework.exception.AmbiguousBeanDefinitionException;
-import com.nleachdev.noveildi.framework.exception.MissingBeanDefinitionException;
+import com.nleachdev.noveildi.framework.exception.ChickenAndEggException;
 import com.nleachdev.noveildi.framework.exception.MissingImplementationException;
 import com.nleachdev.noveildi.framework.model.Dependency;
 import com.nleachdev.noveildi.framework.model.Metadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toSet;
 
 public class DependencyVerifier {
     private static final Logger logger = LoggerFactory.getLogger(DependencyVerifier.class);
     private static final String AMBIGUOUS_BEAN_EXCEPTION_MSG = "More than one bean for type %s defined, which is a dependency for %s; Try using @Named with the correct name to find the instance you want";
     private static final String MISSING_IMPL_EXCEPTION_MSG = "No implementation of interface type %s available for injection, which is a dependency of %s";
     private static final String MISSING_BEAN_EXCEPTION_MSG = "No bean implementation found for type %s, which is a dependency of %s";
+    private static final String CHICKEN_AND_EGG_EXCEPTION_MSG = "Circular Dependency exists between %s (and it's parents) and it's dependencies";
+
     private final Map<String, Metadata> metadataPerBeanName;
     private final Map<Class<?>, Set<String>> beanNamesPerType;
     private final Map<Class<?>, Set<String>> beanNamesPerInterfaceType;
@@ -29,39 +32,118 @@ public class DependencyVerifier {
         this.beanNamesPerInterfaceType = beanNamesPerInterfaceType;
     }
 
-    public void verifyDependencyExistence() {
-        metadataPerBeanName.forEach(this::verifyBeanDependencies);
+    public void verifyDependencies() {
+        resolveDependencies();
+        verifyDependencyHierarchies();
     }
 
-    private void verifyBeanDependencies(final String beanName, final Metadata metadata) {
-        final Class<?> type = metadata.getType();
+    private void verifyDependencyHierarchies() {
+        metadataPerBeanName.values().forEach(
+                beanMetadata -> verifyHierarchy(beanMetadata.getBeanName())
+        );
+
+        final Map<String, Integer> depCostPerBean = new HashMap<>();
+        metadataPerBeanName.forEach((beanName, metadata) -> {
+            final int depCost = getDepCost(beanName, metadata, depCostPerBean);
+            metadata.setDependencyCost(depCost);
+        });
+    }
+
+    private int getDepCost(final String beanName, final Metadata metadata,
+                           final Map<String, Integer> depCostPerBean) {
         final Dependency[] dependencies = metadata.getDependencies();
+        if (dependencies == null || dependencies.length == 0) {
+            depCostPerBean.put(beanName, 0);
+            return 0;
+        }
 
-        Stream.of(dependencies).forEach(dependency -> verifyDependency(beanName, dependency));
-        logger.info("{} with name {} has been verified", type, beanName);
+        int depCost = 1;
+        for (final Dependency dependency : dependencies) {
+            final String depName = dependency.getName();
+            if (!depCostPerBean.containsKey(depName)) {
+                getDepCost(depName, metadataPerBeanName.get(depName), depCostPerBean);
+            }
+            depCost += depCostPerBean.get(depName);
+        }
+
+        depCostPerBean.put(beanName, depCost);
+        return depCost;
     }
 
-    private void verifyDependency(final String dependentName, final Dependency dependency) {
+    private void verifyHierarchy(final String beanName, final String... parentBeanNames) {
+        final String[] newParentBeanNames = appendValue(beanName, parentBeanNames);
+        final Set<String> dependencyNames = getDependencyNamesForBean(beanName);
+        final Set<String> circular = Stream.of(newParentBeanNames)
+                .filter(dependencyNames::contains)
+                .collect(toSet());
+        if (!circular.isEmpty()) {
+            throw new ChickenAndEggException(String.format(CHICKEN_AND_EGG_EXCEPTION_MSG, beanName));
+        }
+
+        dependencyNames.forEach(dependencyName -> verifyHierarchy(dependencyName, newParentBeanNames));
+    }
+
+    public void resolveDependencies() {
+        metadataPerBeanName.forEach(this::resolveDependencies);
+    }
+
+    private void resolveDependencies(final String beanName, final Metadata metadata) {
+        final Dependency[] dependencies = metadata.getDependencies();
+        if (dependencies == null || dependencies.length == 0) {
+            return;
+        }
+        final Set<Metadata> dependencyMetadata = Stream.of(dependencies)
+                .map(dependency -> getDependencyMetadata(beanName, dependency))
+                .collect(toSet());
+        metadata.setDependencyMetadata(dependencyMetadata);
+    }
+
+    private Metadata getDependencyMetadata(final Dependency dependency, final String parentBeanName,
+                                           final Set<String> namesForDepType) {
         final String dependencyName = dependency.getName();
         final Class<?> dependencyType = dependency.getType();
-
-        if (dependency.isInterfaceType()) {
-            final Set<String> implNames = beanNamesPerInterfaceType.get(dependencyType);
-            if (implNames == null || implNames.isEmpty()) {
-                throw new MissingImplementationException(String.format(MISSING_IMPL_EXCEPTION_MSG, dependencyType, dependentName));
-            }
-
-            if (implNames.size() == 1 || implNames.contains(dependencyName)) {
-                return;
-            } else {
-                throw new AmbiguousBeanDefinitionException(String.format(AMBIGUOUS_BEAN_EXCEPTION_MSG, dependencyType, dependentName));
-            }
+        if (namesForDepType == null || namesForDepType.isEmpty()) {
+            throw new MissingImplementationException(String.format(
+                    dependency.isInterfaceType() ? MISSING_IMPL_EXCEPTION_MSG : MISSING_BEAN_EXCEPTION_MSG,
+                    dependencyType, parentBeanName));
         }
 
-        final Set<String> namesForDepType = beanNamesPerType.get(dependencyType);
-        if (namesForDepType == null || namesForDepType.isEmpty() || !namesForDepType.contains(dependencyName)) {
-            throw new MissingBeanDefinitionException(String.format(MISSING_BEAN_EXCEPTION_MSG, dependencyType, dependentName));
+        if (namesForDepType.size() != 1 && !namesForDepType.contains(dependencyName)) {
+            throw new AmbiguousBeanDefinitionException(String.format(AMBIGUOUS_BEAN_EXCEPTION_MSG, dependencyType, parentBeanName));
         }
+
+        final String implName = namesForDepType.size() == 1
+                ? (String) namesForDepType.toArray()[0]
+                : dependencyName;
+        dependency.setName(implName);
+        return metadataPerBeanName.get(implName);
+    }
+
+    private Metadata getDependencyMetadata(final String parentBeanName, final Dependency dependency) {
+        final Class<?> dependencyType = dependency.getType();
+        final Set<String> namesForDepType = dependency.isInterfaceType()
+                ? beanNamesPerInterfaceType.get(dependencyType)
+                : beanNamesPerType.get(dependencyType);
+        return getDependencyMetadata(dependency, parentBeanName, namesForDepType);
+    }
+
+    private Set<String> getDependencyNamesForBean(final String beanName) {
+        final Dependency[] dependencies = metadataPerBeanName.get(beanName).getDependencies();
+        if (dependencies == null) {
+            return new HashSet<>();
+        }
+        return Stream.of(dependencies)
+                .map(Dependency::getName)
+                .collect(toSet());
+    }
+
+    private String[] appendValue(final String str, final String... strArr) {
+        if (strArr == null) {
+            return new String[]{str};
+        }
+        final String[] newArr = Arrays.copyOf(strArr, strArr.length + 1);
+        newArr[strArr.length] = str;
+        return newArr;
     }
 
 }

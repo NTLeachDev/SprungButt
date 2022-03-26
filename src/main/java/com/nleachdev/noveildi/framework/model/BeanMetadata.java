@@ -30,7 +30,7 @@ public class BeanMetadata extends Metadata {
     }
 
     @Override
-    protected Dependency[] getDependencies() {
+    public Dependency[] getDependencies() {
         return injectionPoint.getDependencies();
     }
 
@@ -61,13 +61,14 @@ public class BeanMetadata extends Metadata {
     @Override
     public String toString() {
         return new StringJoiner(", ", BeanMetadata.class.getSimpleName() + "[", "]")
-                .add("classInjectionPoint=" + injectionPoint)
+                .add("injectionPoint=" + injectionPoint)
                 .add("type=" + type)
                 .add("beanName='" + beanName + "'")
                 .add("beanType=" + beanType)
                 .add("dependencyCost=" + dependencyCost)
                 .add("instance=" + instance)
                 .add("interfaces=" + interfaces)
+                .add("dependencyMetadata=" + dependencyMetadata)
                 .toString();
     }
 }

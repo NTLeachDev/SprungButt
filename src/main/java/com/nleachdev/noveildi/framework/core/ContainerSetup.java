@@ -72,7 +72,7 @@ public class ContainerSetup {
     }
 
     private void setupMetadataForConfigType(final Class<?> type, final Constructor<?> constructor) {
-        final String beanName = BeanUtils.getComponentBeanName(type);
+        final String beanName = BeanUtils.getConfigBeanName(type);
         final InjectionPoint injectionPoint = getInjectionPoint(constructor);
         final BeanMethod[] beanMethods = getBeanMethods(type);
         final ConfigBeanMetadata metadata = new ConfigBeanMetadata(type, beanName, injectionPoint, beanMethods);

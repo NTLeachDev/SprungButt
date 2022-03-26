@@ -5,7 +5,7 @@ import java.util.StringJoiner;
 
 public class Dependency {
     private final Class<?> type;
-    private final String name;
+    private String name;
     private final String propertyValue;
     private final boolean isInterfaceType;
 
@@ -22,6 +22,10 @@ public class Dependency {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPropertyValue() {

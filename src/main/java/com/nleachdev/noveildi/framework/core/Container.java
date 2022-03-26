@@ -28,10 +28,30 @@ public enum Container {
     }
 
     public void startContainer(final ContainerConfiguration providedConfig) {
-        clear();
         config = providedConfig;
+        clear();
         setupBeanMetadata();
         verifyDependencies();
+    }
+
+    public Object getBeanForType(final Class<?> clazz) {
+        final Set<String> namesForType = beanNamesPerType.get(clazz);
+        if (namesForType == null || namesForType.size() != 1) {
+            // throw exception?
+            return null;
+        }
+
+        return getBeanForName(((String[]) namesForType.toArray())[0]);
+    }
+
+    public Object getBeanForName(final String beanName) {
+        final Metadata metadata = metadataPerBeanName.get(beanName);
+        if (metadata == null) {
+            // throw exception?
+            return null;
+        }
+
+        return metadata.getInstance();
     }
 
     private static void setupBeanMetadata() {
@@ -49,7 +69,7 @@ public enum Container {
                 metadataPerBeanName,
                 beanNamesPerType,
                 beanNamesPerInterfaceType
-        ).verifyDependencyExistence();
+        ).verifyDependencies();
     }
 
     private static Set<Class<?>> getRelevantClasses() {

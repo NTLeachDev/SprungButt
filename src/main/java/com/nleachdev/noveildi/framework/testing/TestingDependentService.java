@@ -2,6 +2,7 @@ package com.nleachdev.noveildi.framework.testing;
 
 import com.nleachdev.noveildi.framework.annotation.Component;
 import com.nleachdev.noveildi.framework.annotation.Inject;
+import com.nleachdev.noveildi.framework.annotation.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +12,7 @@ public class TestingDependentService {
     private final TestingService testingService;
 
     @Inject
-    public TestingDependentService(final TestingService testingService) {
+    public TestingDependentService(@Named("TestingServiceImpl") final TestingService testingService) {
         this.testingService = testingService;
     }
 

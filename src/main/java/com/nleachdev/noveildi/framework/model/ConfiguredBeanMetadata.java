@@ -74,6 +74,7 @@ public class ConfiguredBeanMetadata extends Metadata {
                 .add("dependencyCost=" + dependencyCost)
                 .add("instance=" + instance)
                 .add("interfaces=" + interfaces)
+                .add("dependencyMetadata=" + dependencyMetadata)
                 .toString();
     }
 }
