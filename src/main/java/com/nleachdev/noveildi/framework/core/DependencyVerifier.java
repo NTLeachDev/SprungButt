@@ -2,9 +2,11 @@ package com.nleachdev.noveildi.framework.core;
 
 import com.nleachdev.noveildi.framework.exception.AmbiguousBeanDefinitionException;
 import com.nleachdev.noveildi.framework.exception.ChickenAndEggException;
+import com.nleachdev.noveildi.framework.exception.MissingBeanDefinitionException;
 import com.nleachdev.noveildi.framework.exception.MissingImplementationException;
 import com.nleachdev.noveildi.framework.model.Dependency;
 import com.nleachdev.noveildi.framework.model.Metadata;
+import com.nleachdev.noveildi.framework.model.PropertyMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,20 +24,22 @@ public class DependencyVerifier {
 
     private final Map<String, Metadata> metadataPerBeanName;
     private final Map<Class<?>, Set<String>> beanNamesPerType;
-    private final Map<Class<?>, Set<String>> beanNamesPerInterfaceType;
 
     public DependencyVerifier(final Map<String, Metadata> metadataPerBeanName,
-                              final Map<Class<?>, Set<String>> beanNamesPerType,
-                              final Map<Class<?>, Set<String>> beanNamesPerInterfaceType) {
+                              final Map<Class<?>, Set<String>> beanNamesPerType) {
         this.metadataPerBeanName = metadataPerBeanName;
         this.beanNamesPerType = beanNamesPerType;
-        this.beanNamesPerInterfaceType = beanNamesPerInterfaceType;
     }
 
     public void verifyDependencies() {
         resolveDependencies();
         verifyDependencyHierarchies();
     }
+
+    public void resolveDependencies() {
+        metadataPerBeanName.forEach(this::resolveDependencies);
+    }
+
 
     private void verifyDependencyHierarchies() {
         metadataPerBeanName.values().forEach(
@@ -59,6 +63,9 @@ public class DependencyVerifier {
 
         int depCost = 1;
         for (final Dependency dependency : dependencies) {
+            if (dependency.getPropertyKey() != null) {
+                continue;
+            }
             final String depName = dependency.getName();
             if (!depCostPerBean.containsKey(depName)) {
                 getDepCost(depName, metadataPerBeanName.get(depName), depCostPerBean);
@@ -83,10 +90,6 @@ public class DependencyVerifier {
         dependencyNames.forEach(dependencyName -> verifyHierarchy(dependencyName, newParentBeanNames));
     }
 
-    public void resolveDependencies() {
-        metadataPerBeanName.forEach(this::resolveDependencies);
-    }
-
     private void resolveDependencies(final String beanName, final Metadata metadata) {
         final Dependency[] dependencies = metadata.getDependencies();
         if (dependencies == null || dependencies.length == 0) {
@@ -98,14 +101,35 @@ public class DependencyVerifier {
         metadata.setDependencyMetadata(dependencyMetadata);
     }
 
+    private Metadata getDependencyMetadata(final String parentBeanName, final Dependency dependency) {
+        final Class<?> dependencyType = dependency.getType();
+        final String propertyKey = dependency.getPropertyKey();
+        if (propertyKey != null) {
+            return getPropertyMetadata(dependencyType, propertyKey);
+        }
+
+        final Set<String> implNames = beanNamesPerType.keySet()
+                .stream()
+                .filter(dependencyType::isAssignableFrom)
+                .map(beanNamesPerType::get)
+                .flatMap(Set::stream)
+                .collect(toSet());
+
+        return getDependencyMetadata(dependency, parentBeanName, implNames);
+    }
+
+    private Metadata getPropertyMetadata(final Class<?> type, final String propertyKey) {
+        final PropertyResolver propertyResolver = Container.getInstance().getConfig().getPropertyResolver();
+        final Object propertyValue = propertyResolver.getValueForProperty(type, propertyKey);
+        return new PropertyMetadata(type, "", propertyKey, propertyValue);
+    }
+
     private Metadata getDependencyMetadata(final Dependency dependency, final String parentBeanName,
                                            final Set<String> namesForDepType) {
         final String dependencyName = dependency.getName();
         final Class<?> dependencyType = dependency.getType();
         if (namesForDepType == null || namesForDepType.isEmpty()) {
-            throw new MissingImplementationException(String.format(
-                    dependency.isInterfaceType() ? MISSING_IMPL_EXCEPTION_MSG : MISSING_BEAN_EXCEPTION_MSG,
-                    dependencyType, parentBeanName));
+            throwForMissingDep(dependencyType, parentBeanName, dependency.isInterfaceType());
         }
 
         if (namesForDepType.size() != 1 && !namesForDepType.contains(dependencyName)) {
@@ -119,20 +143,13 @@ public class DependencyVerifier {
         return metadataPerBeanName.get(implName);
     }
 
-    private Metadata getDependencyMetadata(final String parentBeanName, final Dependency dependency) {
-        final Class<?> dependencyType = dependency.getType();
-        final Set<String> namesForDepType = dependency.isInterfaceType()
-                ? beanNamesPerInterfaceType.get(dependencyType)
-                : beanNamesPerType.get(dependencyType);
-        return getDependencyMetadata(dependency, parentBeanName, namesForDepType);
-    }
-
     private Set<String> getDependencyNamesForBean(final String beanName) {
         final Dependency[] dependencies = metadataPerBeanName.get(beanName).getDependencies();
         if (dependencies == null) {
             return new HashSet<>();
         }
         return Stream.of(dependencies)
+                .filter(dependency -> dependency.getPropertyKey() == null)
                 .map(Dependency::getName)
                 .collect(toSet());
     }
@@ -144,6 +161,14 @@ public class DependencyVerifier {
         final String[] newArr = Arrays.copyOf(strArr, strArr.length + 1);
         newArr[strArr.length] = str;
         return newArr;
+    }
+
+    private void throwForMissingDep(final Class<?> dependencyType, final String parentBeanName, final boolean isInterface) {
+        if (isInterface) {
+            throw new MissingImplementationException(String.format(MISSING_IMPL_EXCEPTION_MSG, dependencyType, parentBeanName));
+        }
+
+        throw new MissingBeanDefinitionException(String.format(MISSING_BEAN_EXCEPTION_MSG, dependencyType, parentBeanName));
     }
 
 }

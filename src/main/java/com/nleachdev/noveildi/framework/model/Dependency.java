@@ -3,16 +3,17 @@ package com.nleachdev.noveildi.framework.model;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class Dependency {
+public class
+Dependency {
     private final Class<?> type;
     private String name;
-    private final String propertyValue;
+    private final String propertyKey;
     private final boolean isInterfaceType;
 
-    public Dependency(final Class<?> type, final String name, final String propertyValue, final boolean isInterfaceType) {
+    public Dependency(final Class<?> type, final String name, final String propertyKey, final boolean isInterfaceType) {
         this.type = type;
         this.name = name;
-        this.propertyValue = propertyValue;
+        this.propertyKey = propertyKey;
         this.isInterfaceType = isInterfaceType;
     }
 
@@ -28,8 +29,8 @@ public class Dependency {
         this.name = name;
     }
 
-    public String getPropertyValue() {
-        return propertyValue;
+    public String getPropertyKey() {
+        return propertyKey;
     }
 
     public boolean isInterfaceType() {
@@ -48,12 +49,12 @@ public class Dependency {
         return isInterfaceType == that.isInterfaceType &&
                 Objects.equals(type, that.type) &&
                 Objects.equals(name, that.name) &&
-                Objects.equals(propertyValue, that.propertyValue);
+                Objects.equals(propertyKey, that.propertyKey);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, name, propertyValue, isInterfaceType);
+        return Objects.hash(type, name, propertyKey, isInterfaceType);
     }
 
     @Override
@@ -61,7 +62,7 @@ public class Dependency {
         return new StringJoiner(", ", Dependency.class.getSimpleName() + "[", "]")
                 .add("type=" + type)
                 .add("name='" + name + "'")
-                .add("propertyValue='" + propertyValue + "'")
+                .add("propertyValue='" + propertyKey + "'")
                 .add("isInterfaceType=" + isInterfaceType)
                 .toString();
     }

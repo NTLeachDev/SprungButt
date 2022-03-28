@@ -6,7 +6,7 @@ import com.nleachdev.noveildi.framework.annotation.Config;
 @Config
 public class TestingConfig {
 
-    @Bean
+    //@Bean
     public Integer whatever() {
         return 21;
     }

@@ -12,6 +12,7 @@ public abstract class Metadata implements Comparable<Metadata> {
     protected Object instance;
     protected final Set<Class<?>> interfaces;
     protected Set<Metadata> dependencyMetadata;
+    protected boolean isProxyTarget;
 
     public Metadata(final Class<?> type, final String beanName, final BeanType beanType) {
         this.type = type;
@@ -73,6 +74,14 @@ public abstract class Metadata implements Comparable<Metadata> {
         this.dependencyMetadata = dependencyMetadata;
     }
 
+    public boolean isProxyTarget() {
+        return isProxyTarget;
+    }
+
+    public void setProxyTarget(final boolean proxyTarget) {
+        isProxyTarget = proxyTarget;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -106,6 +115,7 @@ public abstract class Metadata implements Comparable<Metadata> {
                 .add("instance=" + instance)
                 .add("interfaces=" + interfaces)
                 .add("dependencyMetadata=" + dependencyMetadata)
+                .add("isProxyTarget=" + isProxyTarget)
                 .toString();
     }
 }

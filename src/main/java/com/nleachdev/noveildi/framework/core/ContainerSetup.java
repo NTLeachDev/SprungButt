@@ -20,31 +20,17 @@ public class ContainerSetup {
     private final Map<BeanType, Set<Metadata>> metadataPerBeanType;
     private final Map<String, Metadata> metadataPerBeanName;
     private final Map<Class<?>, Set<String>> beanNamesPerType;
-    private final Map<Class<?>, Set<String>> beanNamesPerInterfaceType;
 
     public ContainerSetup(final Map<BeanType, Set<Metadata>> metadataPerBeanType,
                           final Map<String, Metadata> metadataPerBeanName,
-                          final Map<Class<?>, Set<String>> beanNamesPerType,
-                          final Map<Class<?>, Set<String>> beanNamesPerInterfaceType) {
+                          final Map<Class<?>, Set<String>> beanNamesPerType) {
         this.metadataPerBeanType = metadataPerBeanType;
         this.metadataPerBeanName = metadataPerBeanName;
         this.beanNamesPerType = beanNamesPerType;
-        this.beanNamesPerInterfaceType = beanNamesPerInterfaceType;
     }
 
     public void setupBeanMetadata(final Set<Class<?>> classes) {
         classes.forEach(this::setupBeanMetadata);
-        tieInterfacesToImplementations();
-    }
-
-    private void tieInterfacesToImplementations() {
-        beanNamesPerInterfaceType.forEach((interfaceType, impls) -> {
-            metadataPerBeanName.values().forEach(metadata -> {
-                if (metadata.getInterfaces().contains(interfaceType)) {
-                    impls.add(metadata.getBeanName());
-                }
-            });
-        });
     }
 
     private void setupBeanMetadata(final Class<?> clazz) {
@@ -112,14 +98,11 @@ public class ContainerSetup {
         final Class<?> type = parameter.getType();
         final String name = BeanUtils.getParameterName(parameter);
         final Get annotation = parameter.getAnnotation(Get.class);
-        final String propValue = annotation == null
-                ? ""
+        final String propertyKey = annotation == null
+                ? null
                 : annotation.value();
         final boolean isInterface = type.isInterface();
-        if (isInterface && !beanNamesPerInterfaceType.containsKey(type)) {
-            beanNamesPerInterfaceType.put(type, new HashSet<>());
-        }
-        return new Dependency(type, name, propValue, isInterface);
+        return new Dependency(type, name, propertyKey, isInterface);
     }
 
     private BeanMethod[] getBeanMethods(final Class<?> configClass) {

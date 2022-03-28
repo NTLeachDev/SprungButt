@@ -1,6 +1,7 @@
 package com.nleachdev.noveildi.framework.util;
 
 import com.nleachdev.noveildi.framework.annotation.*;
+import com.nleachdev.noveildi.framework.core.Container;
 import com.nleachdev.noveildi.framework.exception.AmbiguousConstructorException;
 
 import java.lang.annotation.Annotation;
@@ -22,8 +23,15 @@ public final class BeanUtils {
         final Set<Class<?>> annotationTypesForClass = Stream.of(clazz.getAnnotations())
                 .map(Annotation::annotationType)
                 .collect(Collectors.toSet());
-        return annotationTypesForClass.contains(Component.class) || annotationTypesForClass.contains(Config.class)
-                && !clazz.isInterface() && !clazz.isAnnotation()
+
+        final boolean containsComponentAnnotation = Container.getInstance().getConfig().getComponentAnnotations().stream()
+                .anyMatch(annotationTypesForClass::contains);
+        return containsComponentAnnotation && isConcreteType(clazz);
+    }
+
+    private static boolean isConcreteType(final Class<?> clazz) {
+        return !clazz.isInterface()
+                && !clazz.isAnnotation()
                 && !Modifier.isAbstract(clazz.getModifiers());
     }
 

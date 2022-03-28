@@ -21,7 +21,6 @@ public enum Container {
     private static final Map<BeanType, Set<Metadata>> metadataPerBeanType = new HashMap<>();
     private static final Map<String, Metadata> metadataPerBeanName = new HashMap<>();
     private static final Map<Class<?>, Set<String>> beanNamesPerType = new HashMap<>();
-    private static final Map<Class<?>, Set<String>> beanNamesPerInterfaceType = new HashMap<>();
 
     public static Container getInstance() {
         return INSTANCE;
@@ -32,6 +31,10 @@ public enum Container {
         clear();
         setupBeanMetadata();
         verifyDependencies();
+
+        metadataPerBeanName.forEach((beanName, metadata) -> {
+            logger.info("Metadata for bean with name: {}\n{}\n", beanName, metadata);
+        });
     }
 
     public Object getBeanForType(final Class<?> clazz) {
@@ -59,16 +62,14 @@ public enum Container {
         new ContainerSetup(
                 metadataPerBeanType,
                 metadataPerBeanName,
-                beanNamesPerType,
-                beanNamesPerInterfaceType
+                beanNamesPerType
         ).setupBeanMetadata(relevantClasses);
     }
 
     private static void verifyDependencies() {
         new DependencyVerifier(
                 metadataPerBeanName,
-                beanNamesPerType,
-                beanNamesPerInterfaceType
+                beanNamesPerType
         ).verifyDependencies();
     }
 
@@ -101,6 +102,9 @@ public enum Container {
         metadataPerBeanName.clear();
         metadataPerBeanType.clear();
         beanNamesPerType.clear();
-        beanNamesPerInterfaceType.clear();
+    }
+
+    public ContainerConfiguration getConfig() {
+        return config;
     }
 }
