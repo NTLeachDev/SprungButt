@@ -2,10 +2,6 @@ package com.nleachdev.noveildi.framework.model;
 
 import com.nleachdev.noveildi.framework.annotation.Component;
 import com.nleachdev.noveildi.framework.annotation.Config;
-import com.nleachdev.noveildi.framework.core.PropertyResolver;
-import com.nleachdev.noveildi.framework.core.PropertyResolverImpl;
-import com.nleachdev.noveildi.framework.service.BasePackageResolver;
-import com.nleachdev.noveildi.framework.service.PackageResolver;
 
 import java.util.Arrays;
 import java.util.Collections;

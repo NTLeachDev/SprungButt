@@ -7,6 +7,7 @@ import com.nleachdev.noveildi.framework.exception.MissingImplementationException
 import com.nleachdev.noveildi.framework.model.Dependency;
 import com.nleachdev.noveildi.framework.model.Metadata;
 import com.nleachdev.noveildi.framework.model.PropertyMetadata;
+import com.nleachdev.noveildi.framework.model.PropertyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

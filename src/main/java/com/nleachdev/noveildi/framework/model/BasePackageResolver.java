@@ -1,7 +1,5 @@
-package com.nleachdev.noveildi.framework.service;
+package com.nleachdev.noveildi.framework.model;
 
-import com.nleachdev.noveildi.framework.model.ScannablePackage;
-import com.nleachdev.noveildi.framework.model.ScanningTarget;
 import com.nleachdev.noveildi.framework.util.FileUtils;
 
 import java.io.File;

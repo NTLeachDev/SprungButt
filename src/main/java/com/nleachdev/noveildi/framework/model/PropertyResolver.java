@@ -1,4 +1,4 @@
-package com.nleachdev.noveildi.framework.core;
+package com.nleachdev.noveildi.framework.model;
 
 import java.util.Set;
 

@@ -1,4 +1,4 @@
-package com.nleachdev.noveildi.framework.service;
+package com.nleachdev.noveildi.framework.model;
 
 import com.nleachdev.noveildi.framework.exception.ClassScanningException;
 import com.nleachdev.noveildi.framework.util.BeanUtils;

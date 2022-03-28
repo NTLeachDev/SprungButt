@@ -1,4 +1,4 @@
-package com.nleachdev.noveildi.framework.core;
+package com.nleachdev.noveildi.framework.model;
 
 import com.nleachdev.noveildi.framework.exception.PropertyInjectionException;
 import org.slf4j.Logger;

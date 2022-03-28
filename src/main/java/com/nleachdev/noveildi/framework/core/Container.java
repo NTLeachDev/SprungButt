@@ -2,9 +2,9 @@ package com.nleachdev.noveildi.framework.core;
 
 import com.nleachdev.noveildi.framework.exception.ClassScanningException;
 import com.nleachdev.noveildi.framework.model.*;
-import com.nleachdev.noveildi.framework.service.ClassScanner;
-import com.nleachdev.noveildi.framework.service.DirectoryClassScanner;
-import com.nleachdev.noveildi.framework.service.JarFileClassScanner;
+import com.nleachdev.noveildi.framework.model.ClassScanner;
+import com.nleachdev.noveildi.framework.model.DirectoryClassScanner;
+import com.nleachdev.noveildi.framework.model.JarFileClassScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
