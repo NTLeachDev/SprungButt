@@ -6,6 +6,7 @@ import com.nleachdev.noveildi.framework.exception.MissingBeanDefinitionException
 import com.nleachdev.noveildi.framework.exception.MissingImplementationException;
 import com.nleachdev.noveildi.framework.model.Dependency;
 import com.nleachdev.noveildi.framework.model.Metadata;
+import com.nleachdev.noveildi.framework.model.PropertyMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,14 +24,11 @@ public class DependencyVerifier {
 
     private final Map<String, Metadata> metadataPerBeanName;
     private final Map<Class<?>, Set<String>> beanNamesPerType;
-    private final Map<Class<?>, Set<String>> beanNamesPerInterfaceType;
 
     public DependencyVerifier(final Map<String, Metadata> metadataPerBeanName,
-                              final Map<Class<?>, Set<String>> beanNamesPerType,
-                              final Map<Class<?>, Set<String>> beanNamesPerInterfaceType) {
+                              final Map<Class<?>, Set<String>> beanNamesPerType) {
         this.metadataPerBeanName = metadataPerBeanName;
         this.beanNamesPerType = beanNamesPerType;
-        this.beanNamesPerInterfaceType = beanNamesPerInterfaceType;
     }
 
     public void verifyDependencies() {
@@ -65,6 +63,9 @@ public class DependencyVerifier {
 
         int depCost = 1;
         for (final Dependency dependency : dependencies) {
+            if (dependency.getPropertyKey() != null) {
+                continue;
+            }
             final String depName = dependency.getName();
             if (!depCostPerBean.containsKey(depName)) {
                 getDepCost(depName, metadataPerBeanName.get(depName), depCostPerBean);
@@ -100,6 +101,29 @@ public class DependencyVerifier {
         metadata.setDependencyMetadata(dependencyMetadata);
     }
 
+    private Metadata getDependencyMetadata(final String parentBeanName, final Dependency dependency) {
+        final Class<?> dependencyType = dependency.getType();
+        final String propertyKey = dependency.getPropertyKey();
+        if (propertyKey != null) {
+            return getPropertyMetadata(dependencyType, propertyKey);
+        }
+
+        final Set<String> implNames = beanNamesPerType.keySet()
+                .stream()
+                .filter(dependencyType::isAssignableFrom)
+                .map(beanNamesPerType::get)
+                .flatMap(Set::stream)
+                .collect(toSet());
+
+        return getDependencyMetadata(dependency, parentBeanName, implNames);
+    }
+
+    private Metadata getPropertyMetadata(final Class<?> type, final String propertyKey) {
+        final PropertyResolver propertyResolver = Container.getInstance().getConfig().getPropertyResolver();
+        final Object propertyValue = propertyResolver.getValueForProperty(type, propertyKey);
+        return new PropertyMetadata(type, "", propertyKey, propertyValue);
+    }
+
     private Metadata getDependencyMetadata(final Dependency dependency, final String parentBeanName,
                                            final Set<String> namesForDepType) {
         final String dependencyName = dependency.getName();
@@ -119,20 +143,13 @@ public class DependencyVerifier {
         return metadataPerBeanName.get(implName);
     }
 
-    private Metadata getDependencyMetadata(final String parentBeanName, final Dependency dependency) {
-        final Class<?> dependencyType = dependency.getType();
-        final Set<String> namesForDepType = dependency.isInterfaceType()
-                ? beanNamesPerInterfaceType.get(dependencyType)
-                : beanNamesPerType.get(dependencyType);
-        return getDependencyMetadata(dependency, parentBeanName, namesForDepType);
-    }
-
     private Set<String> getDependencyNamesForBean(final String beanName) {
         final Dependency[] dependencies = metadataPerBeanName.get(beanName).getDependencies();
         if (dependencies == null) {
             return new HashSet<>();
         }
         return Stream.of(dependencies)
+                .filter(dependency -> dependency.getPropertyKey() == null)
                 .map(Dependency::getName)
                 .collect(toSet());
     }
