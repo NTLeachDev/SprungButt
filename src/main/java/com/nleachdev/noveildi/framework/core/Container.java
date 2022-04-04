@@ -1,25 +1,26 @@
 package com.nleachdev.noveildi.framework.core;
 
 import com.nleachdev.noveildi.framework.exception.ClassScanningException;
+import com.nleachdev.noveildi.framework.exception.MissingBeanDefinitionException;
 import com.nleachdev.noveildi.framework.model.*;
-import com.nleachdev.noveildi.framework.model.ClassScanner;
-import com.nleachdev.noveildi.framework.model.DirectoryClassScanner;
-import com.nleachdev.noveildi.framework.model.JarFileClassScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import static java.util.stream.Collectors.toSet;
 
 public enum Container {
     INSTANCE;
 
     private static final Logger logger = LoggerFactory.getLogger(Container.class);
     private static final String CLASS_SCANNING_EXCEPTION_MSG = "Unable to setup ClassScanner instance for scannable package: %s";
+    private static final String MISSING_BEAN_DEF_WITH_NAME_EXCEPTION_MSG = "No bean found with specified name %s";
+    private static final String MISSING_BEAN_DEF_WITH_TYPE_NAME_EXCEPTION_MSG = "No bean found with specified type %s and name %s";
+    private static final String MISSING_BEAN_DEF_WITH_TYPE_EXCEPTION_MSG = "No bean found with specified type %s";
     private static ContainerConfiguration config;
-    private static final Map<BeanType, Set<Metadata>> metadataPerBeanType = new HashMap<>();
-    private static final Map<String, Metadata> metadataPerBeanName = new HashMap<>();
+    private static final Map<BeanType, Set<Metadata<?>>> metadataPerBeanType = new HashMap<>();
+    private static final Map<String, Metadata<?>> metadataPerBeanName = new HashMap<>();
     private static final Map<Class<?>, Set<String>> beanNamesPerType = new HashMap<>();
 
     public static Container getInstance() {
@@ -35,26 +36,45 @@ public enum Container {
         metadataPerBeanName.forEach((beanName, metadata) -> {
             logger.info("Metadata for bean with name: {}\n{}\n", beanName, metadata);
         });
+
+        new BeanInstantiation().instantiateBeans(metadataPerBeanName);
     }
 
-    public Object getBeanForType(final Class<?> clazz) {
-        final Set<String> namesForType = beanNamesPerType.get(clazz);
+    public <T> T getBean(final Class<T> clazz) {
+        final Set<String> namesForType = getNamesWithType(clazz);
         if (namesForType == null || namesForType.size() != 1) {
-            // throw exception?
-            return null;
+            throw new MissingBeanDefinitionException(String.format(MISSING_BEAN_DEF_WITH_TYPE_EXCEPTION_MSG, clazz.getSimpleName()));
         }
 
-        return getBeanForName(((String[]) namesForType.toArray())[0]);
+        final List<String> list = new ArrayList<>(namesForType);
+
+        return getBean(list.get(0));
     }
 
-    public Object getBeanForName(final String beanName) {
-        final Metadata metadata = metadataPerBeanName.get(beanName);
-        if (metadata == null) {
-            // throw exception?
-            return null;
+    public <T> T getBean(final Class<?> clazz, final String beanName) {
+        final Set<String> namesForType = getNamesWithType(clazz);
+        if (!namesForType.contains(beanName)) {
+            throw new MissingBeanDefinitionException(String.format(MISSING_BEAN_DEF_WITH_TYPE_NAME_EXCEPTION_MSG, clazz.getSimpleName(), beanName));
         }
 
-        return metadata.getInstance();
+        return getBean(beanName);
+    }
+
+    public <T> T getBean(final String beanName) {
+        final Metadata<?> metadata = metadataPerBeanName.get(beanName);
+        if (metadata == null) {
+            throw new MissingBeanDefinitionException(String.format(MISSING_BEAN_DEF_WITH_NAME_EXCEPTION_MSG, beanName));
+        }
+
+        return (T) metadata.getInstance();
+    }
+
+    private Set<String> getNamesWithType(final Class<?> clazz) {
+        return beanNamesPerType.keySet().stream()
+                .filter(clazz::isAssignableFrom)
+                .map(beanNamesPerType::get)
+                .flatMap(Set::stream)
+                .collect(toSet());
     }
 
     private static void setupBeanMetadata() {

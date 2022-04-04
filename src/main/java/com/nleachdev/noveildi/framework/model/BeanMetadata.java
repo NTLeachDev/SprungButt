@@ -6,26 +6,32 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class BeanMetadata extends Metadata {
-    private final InjectionPoint injectionPoint;
+public class BeanMetadata<T> extends Metadata<T> {
+    private static final String BEAN_INSTANTIATION_EXCEPTION_MSG = "Unable to instantiate bean with name %s";
+    private final InjectionPoint<T> injectionPoint;
 
-    public BeanMetadata(final Class<?> type, final String beanName, final InjectionPoint injectionPoint) {
+    public BeanMetadata(final Class<T> type, final String beanName, final InjectionPoint<T> injectionPoint) {
         super(type, beanName, BeanType.COMPONENT);
         this.injectionPoint = injectionPoint;
     }
 
-    protected BeanMetadata(final Class<?> type, final String beanName, final InjectionPoint injectionPoint,
+    protected BeanMetadata(final Class<T> type, final String beanName, final InjectionPoint<T> injectionPoint,
                            final BeanType beanType) {
         super(type, beanName, beanType);
         this.injectionPoint = injectionPoint;
     }
 
     @Override
-    protected Object createInstance(final Object instance, final Object... args) throws BeanInstantiationException {
+    public void createAndSetInstance(final Object[] args) throws BeanInstantiationException {
         try {
-            return injectionPoint.getConstructor().newInstance(args);
+            instance = args == null || args.length == 0
+                    ? type.newInstance()
+                    : injectionPoint.getConstructor().newInstance(args);
         } catch (final InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new BeanInstantiationException(e.getMessage(), e);
+            throw new BeanInstantiationException(
+                    String.format(BEAN_INSTANTIATION_EXCEPTION_MSG, beanName),
+                    e
+            );
         }
     }
 
@@ -34,7 +40,7 @@ public class BeanMetadata extends Metadata {
         return injectionPoint.getDependencies();
     }
 
-    public InjectionPoint getInjectionPoint() {
+    public InjectionPoint<T> getInjectionPoint() {
         return injectionPoint;
     }
 
@@ -49,7 +55,7 @@ public class BeanMetadata extends Metadata {
         if (!super.equals(o)) {
             return false;
         }
-        final BeanMetadata metadata = (BeanMetadata) o;
+        final BeanMetadata<?> metadata = (BeanMetadata<?>) o;
         return Objects.equals(injectionPoint, metadata.injectionPoint);
     }
 

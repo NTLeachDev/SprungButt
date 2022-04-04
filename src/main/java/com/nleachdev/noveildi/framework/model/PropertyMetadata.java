@@ -2,25 +2,24 @@ package com.nleachdev.noveildi.framework.model;
 
 import com.nleachdev.noveildi.framework.exception.BeanInstantiationException;
 
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class PropertyMetadata extends Metadata {
+public class PropertyMetadata<T> extends Metadata<T> {
     private final String propertyKey;
 
-    public PropertyMetadata(final Class<?> type, final String beanName, final String propertyKey, final Object propertyValue) {
+    public PropertyMetadata(final Class<T> type, final String beanName, final String propertyKey, final T propertyValue) {
         super(type, beanName, BeanType.CONFIGURED_PROPERTY);
         this.propertyKey = propertyKey;
         dependencyCost = 0;
         instance = propertyValue;
-        dependencyMetadata = new HashSet<>();
+        dependencyMetadata = new Metadata[0];
         isProxyTarget = false;
 
     }
 
     @Override
-    protected Object createInstance(final Object instance, final Object... args) throws BeanInstantiationException {
+    public void createAndSetInstance(final Object... args) throws BeanInstantiationException {
         throw new BeanInstantiationException("Should not be trying to call createInstance on PropertyMetadata type");
     }
 
@@ -44,7 +43,7 @@ public class PropertyMetadata extends Metadata {
         if (!super.equals(o)) {
             return false;
         }
-        final PropertyMetadata that = (PropertyMetadata) o;
+        final PropertyMetadata<?> that = (PropertyMetadata<?>) o;
         return Objects.equals(propertyKey, that.propertyKey);
     }
 

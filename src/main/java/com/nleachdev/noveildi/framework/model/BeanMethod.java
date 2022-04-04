@@ -5,13 +5,13 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class BeanMethod {
+public class BeanMethod<T> {
     private final String methodName;
     private final Method method;
-    private final Class<?> returnType;
+    private final Class<T> returnType;
     private final Dependency[] dependencies;
 
-    public BeanMethod(final String methodName, final Method method, final Class<?> returnType, final Dependency[] dependencies) {
+    public BeanMethod(final String methodName, final Method method, final Class<T> returnType, final Dependency[] dependencies) {
         this.methodName = methodName;
         this.method = method;
         this.returnType = returnType;
@@ -26,7 +26,7 @@ public class BeanMethod {
         return method;
     }
 
-    public Class<?> getReturnType() {
+    public Class<T> getReturnType() {
         return returnType;
     }
 
@@ -42,7 +42,7 @@ public class BeanMethod {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final BeanMethod that = (BeanMethod) o;
+        final BeanMethod<?> that = (BeanMethod<?>) o;
         return Objects.equals(methodName, that.methodName) &&
                 Objects.equals(method, that.method) &&
                 Objects.equals(returnType, that.returnType) &&

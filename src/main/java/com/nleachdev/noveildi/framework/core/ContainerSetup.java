@@ -10,19 +10,18 @@ import com.nleachdev.noveildi.framework.util.CollectionUtils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
 public class ContainerSetup {
-    private final Map<BeanType, Set<Metadata>> metadataPerBeanType;
-    private final Map<String, Metadata> metadataPerBeanName;
+    private final Map<BeanType, Set<Metadata<?>>> metadataPerBeanType;
+    private final Map<String, Metadata<?>> metadataPerBeanName;
     private final Map<Class<?>, Set<String>> beanNamesPerType;
 
-    public ContainerSetup(final Map<BeanType, Set<Metadata>> metadataPerBeanType,
-                          final Map<String, Metadata> metadataPerBeanName,
+    public ContainerSetup(final Map<BeanType, Set<Metadata<?>>> metadataPerBeanType,
+                          final Map<String, Metadata<?>> metadataPerBeanName,
                           final Map<Class<?>, Set<String>> beanNamesPerType) {
         this.metadataPerBeanType = metadataPerBeanType;
         this.metadataPerBeanName = metadataPerBeanName;
@@ -33,8 +32,8 @@ public class ContainerSetup {
         classes.forEach(this::setupBeanMetadata);
     }
 
-    private void setupBeanMetadata(final Class<?> clazz) {
-        final Constructor<?> constructor = BeanUtils.getBeanConstructor(clazz);
+    private <T> void setupBeanMetadata(final Class<T> clazz) {
+        final Constructor<T> constructor = BeanUtils.getBeanConstructor(clazz);
         if (BeanUtils.isConfigurationBean(clazz)) {
             setupMetadataForConfigType(clazz, constructor);
         }
@@ -44,8 +43,8 @@ public class ContainerSetup {
         }
     }
 
-    private void trackBean(final Class<?> type, final String beanName, final BeanType beanType,
-                           final Metadata metadata) {
+    private <T> void trackBean(final Class<T> type, final String beanName, final BeanType beanType,
+                           final Metadata<T> metadata) {
         CollectionUtils.addToMapSet(metadataPerBeanType, beanType, metadata);
         CollectionUtils.addToMapSet(beanNamesPerType, type, beanName);
         if (metadataPerBeanName.containsKey(beanName)) {
@@ -57,41 +56,41 @@ public class ContainerSetup {
         metadataPerBeanName.put(beanName, metadata);
     }
 
-    private void setupMetadataForConfigType(final Class<?> type, final Constructor<?> constructor) {
+    private <T> void setupMetadataForConfigType(final Class<T> type, final Constructor<T> constructor) {
         final String beanName = BeanUtils.getConfigBeanName(type);
-        final InjectionPoint injectionPoint = getInjectionPoint(constructor);
-        final BeanMethod[] beanMethods = getBeanMethods(type);
-        final ConfigBeanMetadata metadata = new ConfigBeanMetadata(type, beanName, injectionPoint, beanMethods);
+        final InjectionPoint<T> injectionPoint = getInjectionPoint(constructor);
+        final BeanMethod<?>[] beanMethods = getBeanMethods(type);
+        final ConfigBeanMetadata<T> metadata = new ConfigBeanMetadata<>(type, beanName, injectionPoint, beanMethods);
         trackBean(type, beanName, BeanType.CONFIG_COMPONENT, metadata);
-        setupConfiguredBeanMetadata(beanMethods);
+        setupConfiguredBeanMetadata(beanMethods, metadata);
     }
 
-    private void setupConfiguredBeanMetadata(final BeanMethod[] beanMethods) {
+    private void setupConfiguredBeanMetadata(final BeanMethod<?>[] beanMethods, final ConfigBeanMetadata<?> parentConfigMetadata) {
         Stream.of(beanMethods).forEach(beanMethod -> {
-            final ConfiguredBeanMetadata configuredBeanMetadata = new ConfiguredBeanMetadata(beanMethod);
+            final ConfiguredBeanMetadata<?> configuredBeanMetadata = new ConfiguredBeanMetadata<>(beanMethod, parentConfigMetadata);
             CollectionUtils.addToMapSet(metadataPerBeanType, BeanType.CONFIGURED_METHOD_BEAN, configuredBeanMetadata);
             metadataPerBeanName.put(configuredBeanMetadata.getBeanName(), configuredBeanMetadata);
             CollectionUtils.addToMapSet(beanNamesPerType, configuredBeanMetadata.getType(), configuredBeanMetadata.getBeanName());
         });
     }
 
-    private void setupMetadataForComponentType(final Class<?> type, final Constructor<?> constructor) {
+    private <T> void setupMetadataForComponentType(final Class<T> type, final Constructor<T> constructor) {
         final String beanName = BeanUtils.getComponentBeanName(type);
-        final InjectionPoint injectionPoint = getInjectionPoint(constructor);
-        final BeanMetadata metadata = new BeanMetadata(type, beanName, injectionPoint);
+        final InjectionPoint<T> injectionPoint = getInjectionPoint(constructor);
+        final BeanMetadata<T> metadata = new BeanMetadata<>(type, beanName, injectionPoint);
         trackBean(type, beanName, BeanType.COMPONENT, metadata);
     }
 
-    private InjectionPoint getInjectionPoint(final Constructor<?> constructor) {
+    private <T> InjectionPoint<T> getInjectionPoint(final Constructor<T> constructor) {
         if (constructor == null || constructor.getParameterCount() == 0) {
-            return new InjectionPoint(null, null);
+            return new InjectionPoint<>(constructor, null);
         }
 
         final Dependency[] dependencies = Stream.of(constructor.getParameters())
                 .map(this::getDependencyFromParam)
                 .toArray(Dependency[]::new);
 
-        return new InjectionPoint(constructor, dependencies);
+        return new InjectionPoint<>(constructor, dependencies);
     }
 
     private Dependency getDependencyFromParam(final Parameter parameter) {
@@ -105,14 +104,14 @@ public class ContainerSetup {
         return new Dependency(type, name, propertyKey, isInterface);
     }
 
-    private BeanMethod[] getBeanMethods(final Class<?> configClass) {
+    private BeanMethod<?>[] getBeanMethods(final Class<?> configClass) {
         return Stream.of(configClass.getMethods())
                 .map(this::getBeanMethod)
                 .filter(Objects::nonNull)
                 .toArray(BeanMethod[]::new);
     }
 
-    private BeanMethod getBeanMethod(final Method method) {
+    private BeanMethod<?> getBeanMethod(final Method method) {
         if (!method.isAnnotationPresent(Bean.class)) {
             return null;
         }

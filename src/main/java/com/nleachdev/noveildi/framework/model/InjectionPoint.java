@@ -5,16 +5,16 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class InjectionPoint {
-    private final Constructor<?> constructor;
+public class InjectionPoint<T> {
+    private final Constructor<T> constructor;
     private final Dependency[] dependencies;
 
-    public InjectionPoint(final Constructor<?> constructor, final Dependency[] dependencies) {
+    public InjectionPoint(final Constructor<T> constructor, final Dependency[] dependencies) {
         this.constructor = constructor;
         this.dependencies = dependencies;
     }
 
-    public Constructor<?> getConstructor() {
+    public Constructor<T> getConstructor() {
         return constructor;
     }
 
@@ -27,10 +27,10 @@ public class InjectionPoint {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof InjectionPoint)) {
             return false;
         }
-        final InjectionPoint that = (InjectionPoint) o;
+        final InjectionPoint<?> that = (InjectionPoint<?>) o;
         return Objects.equals(constructor, that.constructor) &&
                 Arrays.equals(dependencies, that.dependencies);
     }

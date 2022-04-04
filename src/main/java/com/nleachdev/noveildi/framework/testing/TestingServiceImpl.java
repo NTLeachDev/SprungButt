@@ -25,7 +25,7 @@ public class TestingServiceImpl implements TestingService {
 
     @Override
     public void doSomeStuff() {
-        logger.info("Doing some stuff");
+        logger.info("Doing some stuff with {}", personName);
     }
 
     @Override

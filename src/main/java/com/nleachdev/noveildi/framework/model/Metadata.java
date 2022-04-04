@@ -4,24 +4,25 @@ import com.nleachdev.noveildi.framework.exception.BeanInstantiationException;
 
 import java.util.*;
 
-public abstract class Metadata implements Comparable<Metadata> {
-    protected final Class<?> type;
+public abstract class Metadata<T> implements Comparator<Metadata<?>> {
+    public static final Comparator<Metadata<?>> COMPARATOR = Comparator.comparing(Metadata::getDependencyCost);
+    protected final Class<T> type;
     protected final String beanName;
     protected final BeanType beanType;
     protected int dependencyCost;
-    protected Object instance;
+    protected T instance;
     protected final Set<Class<?>> interfaces;
-    protected Set<Metadata> dependencyMetadata;
+    protected Metadata<?>[] dependencyMetadata;
     protected boolean isProxyTarget;
 
-    public Metadata(final Class<?> type, final String beanName, final BeanType beanType) {
+    public Metadata(final Class<T> type, final String beanName, final BeanType beanType) {
         this.type = type;
         this.beanName = beanName;
         this.beanType = beanType;
         interfaces = getInterfaces(type);
     }
 
-    protected abstract Object createInstance(final Object instance, final Object... args) throws BeanInstantiationException;
+    public abstract void createAndSetInstance(final Object... args) throws BeanInstantiationException;
 
     public abstract Dependency[] getDependencies();
 
@@ -30,11 +31,11 @@ public abstract class Metadata implements Comparable<Metadata> {
     }
 
     @Override
-    public int compareTo(final Metadata obj) {
-        return Integer.compare(dependencyCost, obj.dependencyCost);
+    public int compare(final Metadata o1, final Metadata o2) {
+        return COMPARATOR.compare(o1, o2);
     }
 
-    public Class<?> getType() {
+    public Class<T> getType() {
         return type;
     }
 
@@ -50,7 +51,7 @@ public abstract class Metadata implements Comparable<Metadata> {
         return dependencyCost;
     }
 
-    public Object getInstance() {
+    public T getInstance() {
         return instance;
     }
 
@@ -58,7 +59,7 @@ public abstract class Metadata implements Comparable<Metadata> {
         return interfaces;
     }
 
-    public Set<Metadata> getDependencyMetadata() {
+    public Metadata[] getDependencyMetadata() {
         return dependencyMetadata;
     }
 
@@ -66,11 +67,11 @@ public abstract class Metadata implements Comparable<Metadata> {
         this.dependencyCost = dependencyCost;
     }
 
-    public void setInstance(final Object instance) {
+    public void setInstance(final T instance) {
         this.instance = instance;
     }
 
-    public void setDependencyMetadata(final Set<Metadata> dependencyMetadata) {
+    public void setDependencyMetadata(final Metadata<?>[] dependencyMetadata) {
         this.dependencyMetadata = dependencyMetadata;
     }
 
@@ -90,14 +91,14 @@ public abstract class Metadata implements Comparable<Metadata> {
         if (!(o instanceof Metadata)) {
             return false;
         }
-        final Metadata metadata = (Metadata) o;
+        final Metadata<T> metadata = (Metadata<T>) o;
         return dependencyCost == metadata.dependencyCost &&
                 Objects.equals(type, metadata.type) &&
                 Objects.equals(beanName, metadata.beanName) &&
                 beanType == metadata.beanType &&
                 Objects.equals(instance, metadata.instance) &&
                 Objects.equals(interfaces, metadata.interfaces) &&
-                Objects.equals(dependencyMetadata, metadata.dependencyMetadata);
+                Arrays.equals(dependencyMetadata, metadata.dependencyMetadata);
     }
 
     @Override
@@ -114,7 +115,7 @@ public abstract class Metadata implements Comparable<Metadata> {
                 .add("dependencyCost=" + dependencyCost)
                 .add("instance=" + instance)
                 .add("interfaces=" + interfaces)
-                .add("dependencyMetadata=" + dependencyMetadata)
+                .add("dependencyMetadata=" + Arrays.toString(dependencyMetadata))
                 .add("isProxyTarget=" + isProxyTarget)
                 .toString();
     }

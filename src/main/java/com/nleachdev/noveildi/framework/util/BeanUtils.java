@@ -80,8 +80,8 @@ public final class BeanUtils {
                 : qualifiedName;
     }
 
-    public static Constructor<?> getBeanConstructor(final Class<?> clazz) {
-        final Constructor<?>[] constructors = Stream.of(clazz.getConstructors())
+    public static <T> Constructor<T> getBeanConstructor(final Class<T> clazz) {
+        final Constructor<T>[] constructors = Stream.of(clazz.getDeclaredConstructors())
                 .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
                 .toArray(Constructor[]::new);
 
