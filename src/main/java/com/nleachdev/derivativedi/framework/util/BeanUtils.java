@@ -30,11 +30,6 @@ public final class BeanUtils {
         return containsComponentAnnotation && isConcreteType(clazz);
     }
 
-    public static boolean isProxyTarget(final Class<?> clazz) {
-        return Arrays.stream(clazz.getMethods())
-                .anyMatch(method -> method.getAnnotation(TestProxy.class) != null);
-    }
-
     private static boolean isConcreteType(final Class<?> clazz) {
         return !clazz.isInterface()
                 && !clazz.isAnnotation()
