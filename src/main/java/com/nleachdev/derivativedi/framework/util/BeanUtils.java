@@ -9,7 +9,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -93,5 +92,11 @@ public final class BeanUtils {
         return constructors.length == 1
                 ? constructors[0]
                 : null;
+    }
+
+    public static boolean isPartOfActiveProfiles(final Class<?> type, final Set<String> activeProfiles) {
+        final Profile profile = type.getAnnotation(Profile.class);
+
+        return activeProfiles.isEmpty() || profile == null || activeProfiles.contains(profile.profileName());
     }
 }

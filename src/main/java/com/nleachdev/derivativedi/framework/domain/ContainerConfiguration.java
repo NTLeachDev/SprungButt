@@ -4,7 +4,6 @@ import com.nleachdev.derivativedi.framework.annotation.Component;
 import com.nleachdev.derivativedi.framework.annotation.Config;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,6 +13,7 @@ public class ContainerConfiguration {
     private PackageResolver packageResolver;
     private final Set<String> availablePackages;
     private final Set<String> propertyFiles;
+    private final Set<String> activeProfiles;
     private final Set<Class<?>> componentAnnotations;
     private final PropertyResolver propertyResolver;
 
@@ -24,6 +24,7 @@ public class ContainerConfiguration {
     private ContainerConfiguration(final Class<?> mainClass) {
         this.mainClass = mainClass;
         propertyFiles = new HashSet<>();
+        activeProfiles = new HashSet<>();
         packageResolver = new BasePackageResolver();
         availablePackages = new HashSet<>();
         availablePackages.add(mainClass.getPackage().getName());
@@ -61,6 +62,16 @@ public class ContainerConfiguration {
         return this;
     }
 
+    public ContainerConfiguration withProfile(final String profileName) {
+        activeProfiles.add(profileName);
+        return this;
+    }
+
+    public ContainerConfiguration withProfiles(final Set<String> profileNames) {
+        activeProfiles.addAll(profileNames);
+        return this;
+    }
+
     public Set<String> getPropertyFiles() {
         return propertyFiles;
     }
@@ -79,5 +90,9 @@ public class ContainerConfiguration {
 
     public PropertyResolver getPropertyResolver() {
         return propertyResolver;
+    }
+
+    public Set<String> getActiveProfiles() {
+        return activeProfiles;
     }
 }

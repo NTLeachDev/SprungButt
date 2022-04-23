@@ -45,7 +45,7 @@ public enum Container {
 
     public <T> T getBean(final Class<T> clazz) {
         final Set<String> namesForType = getNamesWithType(clazz);
-        if (namesForType == null) {
+        if (namesForType.isEmpty()) {
             throw new MissingBeanDefinitionException(String.format(MISSING_BEAN_DEF_WITH_TYPE_EXCEPTION_MSG, clazz.getSimpleName()));
         } else if (namesForType.size() > 1) {
             throw new MultipleBeanDefinitionException(String.format(MULTIPLE_BEAN_DEF_EXCEPTION_MSG, clazz.getSimpleName()));

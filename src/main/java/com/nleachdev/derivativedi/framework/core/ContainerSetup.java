@@ -1,9 +1,6 @@
 package com.nleachdev.derivativedi.framework.core;
 
-import com.nleachdev.derivativedi.framework.domain.BeanMethod;
-import com.nleachdev.derivativedi.framework.domain.BeanType;
-import com.nleachdev.derivativedi.framework.domain.Dependency;
-import com.nleachdev.derivativedi.framework.domain.InjectionPoint;
+import com.nleachdev.derivativedi.framework.domain.*;
 import com.nleachdev.derivativedi.framework.exception.ConflictingBeanNameException;
 import com.nleachdev.derivativedi.framework.annotation.Bean;
 import com.nleachdev.derivativedi.framework.annotation.GetProp;
@@ -27,6 +24,7 @@ public class ContainerSetup {
     private final Map<BeanType, Set<Metadata<?>>> metadataPerBeanType;
     private final Map<String, Metadata<?>> metadataPerBeanName;
     private final Map<Class<?>, Set<String>> beanNamesPerType;
+    private final ContainerConfiguration configuration;
 
     public ContainerSetup(final Map<BeanType, Set<Metadata<?>>> metadataPerBeanType,
                           final Map<String, Metadata<?>> metadataPerBeanName,
@@ -34,6 +32,7 @@ public class ContainerSetup {
         this.metadataPerBeanType = metadataPerBeanType;
         this.metadataPerBeanName = metadataPerBeanName;
         this.beanNamesPerType = beanNamesPerType;
+        this.configuration = Container.getInstance().getConfig();
     }
 
     public void setupBeanMetadata(final Set<Class<?>> classes) {
@@ -41,6 +40,10 @@ public class ContainerSetup {
     }
 
     private <T> void setupBeanMetadata(final Class<T> clazz) {
+        if (!BeanUtils.isPartOfActiveProfiles(clazz, configuration.getActiveProfiles())) {
+            return;
+        }
+
         final Constructor<T> constructor = BeanUtils.getBeanConstructor(clazz);
         if (BeanUtils.isConfigurationBean(clazz)) {
             setupMetadataForConfigType(clazz, constructor);
