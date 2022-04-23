@@ -6,7 +6,7 @@ import com.nleachdev.derivativedi.framework.domain.Dependency;
 import com.nleachdev.derivativedi.framework.domain.InjectionPoint;
 import com.nleachdev.derivativedi.framework.exception.ConflictingBeanNameException;
 import com.nleachdev.derivativedi.framework.annotation.Bean;
-import com.nleachdev.derivativedi.framework.annotation.Get;
+import com.nleachdev.derivativedi.framework.annotation.GetProp;
 import com.nleachdev.derivativedi.framework.domain.metadata.BeanMetadata;
 import com.nleachdev.derivativedi.framework.domain.metadata.ConfigBeanMetadata;
 import com.nleachdev.derivativedi.framework.domain.metadata.ConfiguredBeanMetadata;
@@ -104,7 +104,7 @@ public class ContainerSetup {
     private Dependency getDependencyFromParam(final Parameter parameter) {
         final Class<?> type = parameter.getType();
         final String name = BeanUtils.getParameterName(parameter);
-        final Get annotation = parameter.getAnnotation(Get.class);
+        final GetProp annotation = parameter.getAnnotation(GetProp.class);
         final String propertyKey = annotation == null
                 ? null
                 : annotation.value();

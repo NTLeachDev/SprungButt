@@ -1,7 +1,7 @@
 package com.nleachdev.derivativedi.framework.component
 
 import com.nleachdev.derivativedi.framework.annotation.Component
-import com.nleachdev.derivativedi.framework.annotation.Get
+import com.nleachdev.derivativedi.framework.annotation.GetProp
 import com.nleachdev.derivativedi.framework.annotation.Inject
 import com.nleachdev.derivativedi.framework.annotation.Named
 import org.slf4j.Logger
@@ -15,7 +15,7 @@ class TestingServiceImpl implements TestingService {
 
     @Inject
     TestingServiceImpl(@Named("someInt") final Integer someInt,
-                              @Get("person.name") final String personName) {
+                              @GetProp("person.name") final String personName) {
         this.someInt = someInt
         this.personName = personName
     }
