@@ -1,5 +1,6 @@
 package com.nleachdev.derivativedi.framework
 
+import com.nleachdev.derivativedi.framework.component.OtherTestingServiceImpl
 import com.nleachdev.derivativedi.framework.component.TestingDependentService
 import com.nleachdev.derivativedi.framework.component.TestingService
 import com.nleachdev.derivativedi.framework.core.Container
@@ -11,6 +12,7 @@ class IntegrationTest extends Specification {
 
     def setup() {
         final ContainerConfiguration config = ContainerConfiguration.getConfig(IntegrationTest)
+                .withPropertyFile("application.properties")
         Container.getInstance().startContainer(config)
     }
 
@@ -40,5 +42,13 @@ class IntegrationTest extends Specification {
 
         then:
         name == "Nicholas Leach"
+    }
+
+    def 'We can use the provided default value if a property key is not found'() {
+        when:
+        final def results = Container.getInstance().getBean(OtherTestingServiceImpl).getSomeLong()
+
+        then:
+        results == 26
     }
 }

@@ -30,7 +30,6 @@ public class PropertyResolverImpl implements PropertyResolver {
 
         return propertyFiles.stream()
                 .map(fileName -> getPropertyValue(fileName, propKey))
-                .filter(Objects::nonNull)
                 .map(value -> buildFromPropertyValue(fieldType, value, defaultValue))
                 .filter(Objects::nonNull)
                 .findFirst()

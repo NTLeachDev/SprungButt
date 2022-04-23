@@ -28,7 +28,7 @@ public class ContainerConfiguration {
         availablePackages = new HashSet<>();
         availablePackages.add(mainClass.getPackage().getName());
         componentAnnotations = new HashSet<>(Arrays.asList(BASE_COMPONENT_ANNOTATION_TYPES));
-        propertyResolver = new PropertyResolverImpl(new HashSet<>(Collections.singletonList("application.properties")));
+        propertyResolver = new PropertyResolverImpl(propertyFiles);
     }
 
     public ContainerConfiguration addComponentAnnotations(final Class<?>[] additionalComponentAnnotations) {
