@@ -1,15 +1,13 @@
 package com.nleachdev.derivativedi.framework
 
+import com.nleachdev.derivativedi.framework.component.TestingDependentService
 import com.nleachdev.derivativedi.framework.component.TestingService
 import com.nleachdev.derivativedi.framework.core.Container
 import com.nleachdev.derivativedi.framework.domain.ContainerConfiguration
 import com.nleachdev.derivativedi.framework.exception.MultipleBeanDefinitionException
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import spock.lang.Specification
 
 class IntegrationTest extends Specification {
-    private static final Logger logger = LoggerFactory.getLogger(IntegrationTest)
 
     def setup() {
         final ContainerConfiguration config = ContainerConfiguration.getConfig(IntegrationTest)
@@ -34,5 +32,13 @@ class IntegrationTest extends Specification {
 
         then:
         thrown(MultipleBeanDefinitionException)
+    }
+
+    def 'We can inject properties values into constructor fields to make available to the component'() {
+        when:
+        final String name = Container.getInstance().getBean(TestingDependentService).getName()
+
+        then:
+        name == "Nicholas Leach"
     }
 }

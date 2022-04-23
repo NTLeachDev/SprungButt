@@ -88,7 +88,6 @@ public class ConfiguredBeanMetadata<T> extends Metadata<T> {
                 .add("instance=" + instance)
                 .add("interfaces=" + interfaces)
                 .add("dependencyMetadata=" + Arrays.toString(dependencyMetadata))
-                .add("isProxyTarget=" + isProxyTarget)
                 .toString();
     }
 }

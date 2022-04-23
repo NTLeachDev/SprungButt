@@ -16,8 +16,6 @@ public class PropertyMetadata<T> extends Metadata<T> {
         dependencyCost = 0;
         instance = propertyValue;
         dependencyMetadata = new Metadata[0];
-        isProxyTarget = false;
-
     }
 
     @Override
@@ -65,7 +63,6 @@ public class PropertyMetadata<T> extends Metadata<T> {
                 .add("instance=" + instance)
                 .add("interfaces=" + interfaces)
                 .add("dependencyMetadata=" + dependencyMetadata)
-                .add("isProxyTarget=" + isProxyTarget)
                 .toString();
     }
 }

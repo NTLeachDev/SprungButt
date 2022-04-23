@@ -16,14 +16,12 @@ public abstract class Metadata<T> implements Comparator<Metadata<?>> {
     protected T instance;
     protected final Set<Class<?>> interfaces;
     protected Metadata<?>[] dependencyMetadata;
-    protected boolean isProxyTarget;
 
     public Metadata(final Class<T> type, final String beanName, final BeanType beanType) {
         this.type = type;
         this.beanName = beanName;
         this.beanType = beanType;
         interfaces = getInterfaces(type);
-        isProxyTarget = BeanUtils.isProxyTarget(type);
     }
 
     public abstract void createAndSetInstance(final Object... args) throws BeanInstantiationException;
@@ -79,14 +77,6 @@ public abstract class Metadata<T> implements Comparator<Metadata<?>> {
         this.dependencyMetadata = dependencyMetadata;
     }
 
-    public boolean isProxyTarget() {
-        return isProxyTarget;
-    }
-
-    public void setProxyTarget(final boolean proxyTarget) {
-        isProxyTarget = proxyTarget;
-    }
-
     private int getInstantiationPriority() {
         return dependencyCost + beanType.getTypePriority();
     }
@@ -124,7 +114,6 @@ public abstract class Metadata<T> implements Comparator<Metadata<?>> {
                 .add("instance=" + instance)
                 .add("interfaces=" + interfaces)
                 .add("dependencyMetadata=" + Arrays.toString(dependencyMetadata))
-                .add("isProxyTarget=" + isProxyTarget)
                 .toString();
     }
 }
