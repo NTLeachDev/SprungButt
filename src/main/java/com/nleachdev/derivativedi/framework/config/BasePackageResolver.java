@@ -1,8 +1,11 @@
-package com.nleachdev.derivativedi.framework.domain;
+package com.nleachdev.derivativedi.framework.config;
 
+import com.nleachdev.derivativedi.framework.scanner.ScannablePackage;
+import com.nleachdev.derivativedi.framework.scanner.ScanningTarget;
 import com.nleachdev.derivativedi.framework.util.FileUtils;
 
 import java.io.File;
+import java.util.Set;
 
 public class BasePackageResolver implements PackageResolver {
 

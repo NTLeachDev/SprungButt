@@ -6,32 +6,32 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 public class BeanMethod<T> {
-    private final String methodName;
+    private final String beanName;
     private final Method method;
     private final Class<T> returnType;
     private final Dependency[] dependencies;
 
-    public BeanMethod(final String methodName, final Method method, final Class<T> returnType, final Dependency[] dependencies) {
-        this.methodName = methodName;
+    public BeanMethod(final String beanName, final Method method, final Class<T> returnType, final Dependency[] dependencies) {
+        this.beanName = beanName;
         this.method = method;
         this.returnType = returnType;
         this.dependencies = dependencies;
     }
 
-    public String getMethodName() {
-        return methodName;
+    public String getBeanName() {
+        return this.beanName;
     }
 
     public Method getMethod() {
-        return method;
+        return this.method;
     }
 
     public Class<T> getReturnType() {
-        return returnType;
+        return this.returnType;
     }
 
     public Dependency[] getDependencies() {
-        return dependencies;
+        return this.dependencies;
     }
 
     @Override
@@ -39,30 +39,30 @@ public class BeanMethod<T> {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         final BeanMethod<?> that = (BeanMethod<?>) o;
-        return Objects.equals(methodName, that.methodName) &&
-                Objects.equals(method, that.method) &&
-                Objects.equals(returnType, that.returnType) &&
-                Arrays.equals(dependencies, that.dependencies);
+        return Objects.equals(this.beanName, that.beanName) &&
+                Objects.equals(this.method, that.method) &&
+                Objects.equals(this.returnType, that.returnType) &&
+                Arrays.equals(this.dependencies, that.dependencies);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(methodName, method, returnType);
-        result = 31 * result + Arrays.hashCode(dependencies);
+        int result = Objects.hash(this.beanName, this.method, this.returnType);
+        result = 31 * result + Arrays.hashCode(this.dependencies);
         return result;
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", BeanMethod.class.getSimpleName() + "[", "]")
-                .add("methodName='" + methodName + "'")
-                .add("instance=" + method)
-                .add("returnType=" + returnType)
-                .add("dependencies=" + Arrays.toString(dependencies))
+                .add("methodName='" + this.beanName + "'")
+                .add("instance=" + this.method)
+                .add("returnType=" + this.returnType)
+                .add("dependencies=" + Arrays.toString(this.dependencies))
                 .toString();
     }
 }

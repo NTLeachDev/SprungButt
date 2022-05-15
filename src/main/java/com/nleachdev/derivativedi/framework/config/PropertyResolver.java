@@ -1,4 +1,4 @@
-package com.nleachdev.derivativedi.framework.domain;
+package com.nleachdev.derivativedi.framework.config;
 
 public interface PropertyResolver {
 

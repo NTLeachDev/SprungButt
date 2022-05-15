@@ -7,15 +7,15 @@ import com.nleachdev.derivativedi.framework.domain.Dependency;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class PropertyMetadata<T> extends Metadata<T> {
+public class PropertyMetadataa<T> extends Metadataa<T> {
     private final String propertyKey;
 
-    public PropertyMetadata(final Class<T> type, final String beanName, final String propertyKey, final T propertyValue) {
+    public PropertyMetadataa(final Class<T> type, final String beanName, final String propertyKey, final T propertyValue) {
         super(type, beanName, BeanType.CONFIGURED_PROPERTY);
         this.propertyKey = propertyKey;
         dependencyCost = 0;
         instance = propertyValue;
-        dependencyMetadata = new Metadata[0];
+        dependencyMetadata = new Metadataa[0];
     }
 
     @Override
@@ -37,13 +37,13 @@ public class PropertyMetadata<T> extends Metadata<T> {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof PropertyMetadata)) {
+        if (!(o instanceof PropertyMetadataa)) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        final PropertyMetadata<?> that = (PropertyMetadata<?>) o;
+        final PropertyMetadataa<?> that = (PropertyMetadataa<?>) o;
         return Objects.equals(propertyKey, that.propertyKey);
     }
 
@@ -54,7 +54,7 @@ public class PropertyMetadata<T> extends Metadata<T> {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", PropertyMetadata.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", PropertyMetadataa.class.getSimpleName() + "[", "]")
                 .add("propertyKey='" + propertyKey + "'")
                 .add("type=" + type)
                 .add("beanName='" + beanName + "'")

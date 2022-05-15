@@ -1,7 +1,8 @@
 package com.nleachdev.derivativedi.framework.util;
 
 import com.nleachdev.derivativedi.framework.annotation.*;
-import com.nleachdev.derivativedi.framework.core.Container;
+import com.nleachdev.derivativedi.framework.core.Containerr;
+import com.nleachdev.derivativedi.framework.domain.BeanType;
 import com.nleachdev.derivativedi.framework.exception.AmbiguousConstructorException;
 
 import java.lang.annotation.Annotation;
@@ -24,7 +25,7 @@ public final class BeanUtils {
                 .map(Annotation::annotationType)
                 .collect(Collectors.toSet());
 
-        final boolean containsComponentAnnotation = Container.getInstance().getConfig().getComponentAnnotations().stream()
+        final boolean containsComponentAnnotation = Containerr.getInstance().getConfig().getComponentAnnotations().stream()
                 .anyMatch(annotationTypesForClass::contains);
         return containsComponentAnnotation && isConcreteType(clazz);
     }
@@ -41,6 +42,12 @@ public final class BeanUtils {
 
     public static boolean isComponentBean(final Class<?> clazz) {
         return clazz.isAnnotationPresent(Component.class) && !clazz.isAnnotationPresent(Config.class);
+    }
+
+    public static String getBeanName(final Class<?> clazz) {
+        return isComponentBean(clazz)
+                ? getComponentBeanName(clazz)
+                : getConfigBeanName(clazz);
     }
 
     public static String getConfigBeanName(final Class<?> clazz) {
@@ -98,5 +105,11 @@ public final class BeanUtils {
         final Profile profile = type.getAnnotation(Profile.class);
 
         return activeProfiles.isEmpty() || profile == null || activeProfiles.contains(profile.profileName());
+    }
+
+    public static BeanType getBeanType(final Class<?> clazz) {
+        return isComponentBean(clazz)
+                ? BeanType.COMPONENT
+                : BeanType.CONFIG_COMPONENT;
     }
 }

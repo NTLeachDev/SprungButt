@@ -1,4 +1,4 @@
-package com.nleachdev.derivativedi.framework.domain;
+package com.nleachdev.derivativedi.framework.config;
 
 import com.nleachdev.derivativedi.framework.exception.PropertyInjectionException;
 import org.slf4j.Logger;
@@ -10,13 +10,13 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
-public class PropertyResolverImpl implements PropertyResolver {
-    private static final Logger logger = LoggerFactory.getLogger(PropertyResolverImpl.class);
+public class BasePropertyResolver implements PropertyResolver {
+    private static final Logger logger = LoggerFactory.getLogger(BasePropertyResolver.class);
     private static final String NO_PROPERTY_FOUND_EXCEPTION_MSG = "No property (or default) found for key: %s";
     private static final String FILE_READ_EXCEPTION = "Unable to parse property file with name: %s";
     private final Set<String> propertyFiles;
 
-    public PropertyResolverImpl(final Set<String> propertyFiles) {
+    public BasePropertyResolver(final Set<String> propertyFiles) {
         this.propertyFiles = propertyFiles;
     }
 

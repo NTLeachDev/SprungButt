@@ -8,11 +8,11 @@ import com.nleachdev.derivativedi.framework.domain.InjectionPoint;
 import java.util.Arrays;
 import java.util.StringJoiner;
 
-public class ConfigBeanMetadata<T> extends BeanMetadata<T> {
+public class ConfigBeanMetadataa<T> extends BeanMetadataa<T> {
     private final BeanMethod<?>[] beanMethods;
 
-    public ConfigBeanMetadata(final Class<T> type, final String beanName, final InjectionPoint<T> injectionPoint,
-                              final BeanMethod<?>[] beanMethods) {
+    public ConfigBeanMetadataa(final Class<T> type, final String beanName, final InjectionPoint<T> injectionPoint,
+                               final BeanMethod<?>[] beanMethods) {
         super(type, beanName, injectionPoint, BeanType.CONFIG_COMPONENT);
         this.beanMethods = beanMethods;
     }
@@ -26,13 +26,13 @@ public class ConfigBeanMetadata<T> extends BeanMetadata<T> {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ConfigBeanMetadata)) {
+        if (!(o instanceof ConfigBeanMetadataa)) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        final ConfigBeanMetadata<?> that = (ConfigBeanMetadata<?>) o;
+        final ConfigBeanMetadataa<?> that = (ConfigBeanMetadataa<?>) o;
         return Arrays.equals(beanMethods, that.beanMethods);
     }
 
@@ -45,7 +45,7 @@ public class ConfigBeanMetadata<T> extends BeanMetadata<T> {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", ConfigBeanMetadata.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", ConfigBeanMetadataa.class.getSimpleName() + "[", "]")
                 .add("beanMethods=" + Arrays.toString(beanMethods))
                 .add("type=" + type)
                 .add("beanName='" + beanName + "'")

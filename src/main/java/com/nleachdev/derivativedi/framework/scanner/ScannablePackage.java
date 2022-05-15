@@ -1,4 +1,4 @@
-package com.nleachdev.derivativedi.framework.domain;
+package com.nleachdev.derivativedi.framework.scanner;
 
 import java.util.Objects;
 import java.util.StringJoiner;

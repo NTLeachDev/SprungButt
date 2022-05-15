@@ -3,8 +3,7 @@ package com.nleachdev.derivativedi.framework.domain;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class
-Dependency {
+public class Dependency {
     private final Class<?> type;
     private String name;
     private final String propertyKey;

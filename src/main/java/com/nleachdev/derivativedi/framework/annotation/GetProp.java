@@ -1,12 +1,10 @@
 package com.nleachdev.derivativedi.framework.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.FIELD})
+@Inherited
 public @interface GetProp {
     String value() default "";
 }

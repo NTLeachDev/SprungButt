@@ -1,84 +1,58 @@
 package com.nleachdev.derivativedi.framework.domain.metadata;
 
-import com.nleachdev.derivativedi.framework.exception.BeanInstantiationException;
-import com.nleachdev.derivativedi.framework.util.BeanUtils;
 import com.nleachdev.derivativedi.framework.domain.BeanType;
 import com.nleachdev.derivativedi.framework.domain.Dependency;
 
 import java.util.*;
 
-public abstract class Metadata<T> implements Comparator<Metadata<?>> {
+public class Metadata<T> {
     public static final Comparator<Metadata<?>> COMPARATOR = Comparator.comparing(Metadata::getInstantiationPriority);
     protected final Class<T> type;
-    protected final String beanName;
     protected final BeanType beanType;
-    protected int dependencyCost;
-    protected T instance;
+    protected final String beanName;
+    protected final Dependency[] dependencies;
     protected final Set<Class<?>> interfaces;
-    protected Metadata<?>[] dependencyMetadata;
+    protected int dependencyCost;
 
-    public Metadata(final Class<T> type, final String beanName, final BeanType beanType) {
+    protected T getInstance(final Object... args) {
+        return null;
+    }
+
+    public Metadata(final Class<T> type, final BeanType beanType, final String beanName,
+                    final Dependency[] dependencies, final Set<Class<?>> interfaces) {
         this.type = type;
-        this.beanName = beanName;
         this.beanType = beanType;
-        interfaces = getInterfaces(type);
-    }
-
-    public abstract void createAndSetInstance(final Object... args) throws BeanInstantiationException;
-
-    public abstract Dependency[] getDependencies();
-
-    private static Set<Class<?>> getInterfaces(final Class<?> clazz) {
-        return new HashSet<>(Arrays.asList(clazz.getInterfaces()));
-    }
-
-    @Override
-    public int compare(final Metadata o1, final Metadata o2) {
-        return COMPARATOR.compare(o1, o2);
+        this.beanName = beanName;
+        this.dependencies = dependencies;
+        this.interfaces = interfaces;
     }
 
     public Class<T> getType() {
-        return type;
-    }
-
-    public String getBeanName() {
-        return beanName;
+        return this.type;
     }
 
     public BeanType getBeanType() {
-        return beanType;
+        return this.beanType;
     }
 
-    public int getDependencyCost() {
-        return dependencyCost;
+    public String getBeanName() {
+        return this.beanName;
     }
 
-    public T getInstance() {
-        return instance;
+    public Dependency[] getDependencyNames() {
+        return this.dependencies;
     }
 
     public Set<Class<?>> getInterfaces() {
-        return interfaces;
+        return this.interfaces;
     }
 
-    public Metadata[] getDependencyMetadata() {
-        return dependencyMetadata;
+    public int getDependencyCost() {
+        return this.dependencyCost;
     }
 
     public void setDependencyCost(final int dependencyCost) {
         this.dependencyCost = dependencyCost;
-    }
-
-    public void setInstance(final T instance) {
-        this.instance = instance;
-    }
-
-    public void setDependencyMetadata(final Metadata<?>[] dependencyMetadata) {
-        this.dependencyMetadata = dependencyMetadata;
-    }
-
-    private int getInstantiationPriority() {
-        return dependencyCost + beanType.getTypePriority();
     }
 
     @Override
@@ -86,34 +60,35 @@ public abstract class Metadata<T> implements Comparator<Metadata<?>> {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Metadata)) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        final Metadata<T> metadata = (Metadata<T>) o;
-        return dependencyCost == metadata.dependencyCost &&
-                Objects.equals(type, metadata.type) &&
-                Objects.equals(beanName, metadata.beanName) &&
-                beanType == metadata.beanType &&
-                Objects.equals(instance, metadata.instance) &&
-                Objects.equals(interfaces, metadata.interfaces) &&
-                Arrays.equals(dependencyMetadata, metadata.dependencyMetadata);
+        final Metadata<?> metadata = (Metadata<?>) o;
+        return this.dependencyCost == metadata.dependencyCost && Objects.equals(this.type, metadata.type)
+                && this.beanType == metadata.beanType && Objects.equals(this.beanName, metadata.beanName)
+                && Arrays.equals(this.dependencies, metadata.dependencies) && Objects.equals(this.interfaces, metadata.interfaces);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, beanName, beanType, dependencyCost, instance, interfaces, dependencyMetadata);
+        int result = Objects.hash(this.type, this.beanType, this.beanName, this.interfaces, this.dependencyCost);
+        result = 31 * result + Arrays.hashCode(this.dependencies);
+        return result;
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", Metadata.class.getSimpleName() + "[", "]")
-                .add("type=" + type)
-                .add("beanName='" + beanName + "'")
-                .add("beanType=" + beanType)
-                .add("dependencyCost=" + dependencyCost)
-                .add("instance=" + instance)
-                .add("interfaces=" + interfaces)
-                .add("dependencyMetadata=" + Arrays.toString(dependencyMetadata))
+                .add("type=" + this.type)
+                .add("beanType=" + this.beanType)
+                .add("beanName='" + this.beanName + "'")
+                .add("dependencies=" + Arrays.toString(this.dependencies))
+                .add("interfaces=" + this.interfaces)
+                .add("dependencyCost=" + this.dependencyCost)
                 .toString();
+    }
+
+    private int getInstantiationPriority() {
+        return this.dependencyCost + this.beanType.getTypePriority();
     }
 }

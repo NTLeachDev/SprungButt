@@ -3,52 +3,51 @@ package com.nleachdev.derivativedi.framework.domain.metadata;
 import com.nleachdev.derivativedi.framework.domain.BeanType;
 import com.nleachdev.derivativedi.framework.domain.Dependency;
 import com.nleachdev.derivativedi.framework.exception.BeanInstantiationException;
-import com.nleachdev.derivativedi.framework.domain.BeanMethod;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 import java.util.StringJoiner;
 
 public class ConfiguredBeanMetadata<T> extends Metadata<T> {
-    private final Method method;
-    private final Dependency[] dependencies;
-    private final ConfigBeanMetadata<?> parentConfigMetadata;
+    protected final Method method;
+    protected Object parentInstance;
+    protected Dependency parent;
 
-    public ConfiguredBeanMetadata(final Class<T> type, final String beanName, final Method method, final Dependency[] dependencies, final ConfigBeanMetadata<?> parentConfigMetadata) {
-        super(type, beanName, BeanType.CONFIGURED_METHOD_BEAN);
+    public ConfiguredBeanMetadata(final Class<T> type, final String beanName, final Dependency[] dependencies,
+                                  final Set<Class<?>> interfaces, final Method method, final Dependency parent) {
+        super(type, BeanType.CONFIGURED_METHOD_BEAN, beanName, dependencies, interfaces);
         this.method = method;
-        this.dependencies = dependencies;
-        this.parentConfigMetadata = parentConfigMetadata;
-    }
-
-    public ConfiguredBeanMetadata(final BeanMethod<T> beanMethod, final ConfigBeanMetadata<?> parentConfigMetadata) {
-        this(beanMethod.getReturnType(), beanMethod.getMethodName(), beanMethod.getMethod(), beanMethod.getDependencies(), parentConfigMetadata);
+        this.parent = parent;
     }
 
     @Override
-    public void createAndSetInstance(final Object... args) throws BeanInstantiationException {
+    @SuppressWarnings("unchecked")
+    protected T getInstance(final Object... args) {
         try {
-            instance = (T) (args == null || args.length == 0
-                    ? method.invoke(parentConfigMetadata.getInstance())
-                    : method.invoke(parentConfigMetadata.getInstance(), args));
+            return (T) (args == null || args.length == 0
+                    ? this.method.invoke(this.parentInstance)
+                    : this.method.invoke(this.parentInstance, args));
         } catch (final IllegalAccessException | InvocationTargetException e) {
-            throw new BeanInstantiationException(e.getMessage(), e);
+            throw new BeanInstantiationException(e);
         }
     }
 
-    @Override
-    public Dependency[] getDependencies() {
-        return dependencies;
-    }
-
     public Method getMethod() {
-        return method;
+        return this.method;
     }
 
-    public ConfigBeanMetadata<?> getParentConfigMetadata() {
-        return parentConfigMetadata;
+    public Object getParentInstance() {
+        return this.parentInstance;
+    }
+
+    public void setParentInstance(final Object parentInstance) {
+        this.parentInstance = parentInstance;
+    }
+
+    public Dependency getParent() {
+        return this.parent;
     }
 
     @Override
@@ -56,38 +55,27 @@ public class ConfiguredBeanMetadata<T> extends Metadata<T> {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ConfiguredBeanMetadata)) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
         final ConfiguredBeanMetadata<?> that = (ConfiguredBeanMetadata<?>) o;
-        return Objects.equals(method, that.method) &&
-                Arrays.equals(dependencies, that.dependencies) &&
-                Objects.equals(parentConfigMetadata, that.parentConfigMetadata);
+        return Objects.equals(this.method, that.method) && Objects.equals(this.parentInstance, that.parentInstance) && Objects.equals(this.parent, that.parent);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), method, parentConfigMetadata);
-        result = 31 * result + Arrays.hashCode(dependencies);
-        return result;
+        return Objects.hash(super.hashCode(), this.method, this.parentInstance, this.parent);
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", ConfiguredBeanMetadata.class.getSimpleName() + "[", "]")
-                .add("method=" + method)
-                .add("dependencies=" + Arrays.toString(dependencies))
-                .add("parentConfigMetadata=" + parentConfigMetadata)
-                .add("type=" + type)
-                .add("beanName='" + beanName + "'")
-                .add("beanType=" + beanType)
-                .add("dependencyCost=" + dependencyCost)
-                .add("instance=" + instance)
-                .add("interfaces=" + interfaces)
-                .add("dependencyMetadata=" + Arrays.toString(dependencyMetadata))
+                .add("method=" + this.method)
+                .add("parentInstance=" + this.parentInstance)
+                .add("parent=" + this.parent)
                 .toString();
     }
 }

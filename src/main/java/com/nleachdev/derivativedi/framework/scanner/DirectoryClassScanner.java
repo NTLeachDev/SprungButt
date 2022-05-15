@@ -1,4 +1,4 @@
-package com.nleachdev.derivativedi.framework.domain;
+package com.nleachdev.derivativedi.framework.scanner;
 
 import com.nleachdev.derivativedi.framework.exception.ClassScanningException;
 import com.nleachdev.derivativedi.framework.util.BeanUtils;

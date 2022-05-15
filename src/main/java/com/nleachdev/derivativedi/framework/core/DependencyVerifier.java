@@ -1,13 +1,13 @@
 package com.nleachdev.derivativedi.framework.core;
 
-import com.nleachdev.derivativedi.framework.domain.PropertyResolver;
+import com.nleachdev.derivativedi.framework.config.PropertyResolver;
 import com.nleachdev.derivativedi.framework.exception.AmbiguousBeanDefinitionException;
 import com.nleachdev.derivativedi.framework.exception.ChickenAndEggException;
 import com.nleachdev.derivativedi.framework.exception.MissingBeanDefinitionException;
 import com.nleachdev.derivativedi.framework.exception.MissingImplementationException;
 import com.nleachdev.derivativedi.framework.domain.Dependency;
-import com.nleachdev.derivativedi.framework.domain.metadata.Metadata;
-import com.nleachdev.derivativedi.framework.domain.metadata.PropertyMetadata;
+import com.nleachdev.derivativedi.framework.domain.metadata.Metadataa;
+import com.nleachdev.derivativedi.framework.domain.metadata.PropertyMetadataa;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +23,10 @@ public class DependencyVerifier {
     private static final String MISSING_BEAN_EXCEPTION_MSG = "No bean implementation found for type %s, which is a dependency of %s";
     private static final String CHICKEN_AND_EGG_EXCEPTION_MSG = "Circular Dependency exists between %s (and it's parents) and it's dependencies";
 
-    private final Map<String, Metadata<?>> metadataPerBeanName;
+    private final Map<String, Metadataa<?>> metadataPerBeanName;
     private final Map<Class<?>, Set<String>> beanNamesPerType;
 
-    public DependencyVerifier(final Map<String, Metadata<?>> metadataPerBeanName,
+    public DependencyVerifier(final Map<String, Metadataa<?>> metadataPerBeanName,
                               final Map<Class<?>, Set<String>> beanNamesPerType) {
         this.metadataPerBeanName = metadataPerBeanName;
         this.beanNamesPerType = beanNamesPerType;
@@ -37,7 +37,8 @@ public class DependencyVerifier {
         verifyDependencyHierarchies();
     }
 
-    public void resolveDependencies() {
+    public void
+    resolveDependencies() {
         metadataPerBeanName.forEach(this::resolveDependencies);
     }
 
@@ -54,9 +55,9 @@ public class DependencyVerifier {
         });
     }
 
-    private int getDepCost(final String beanName, final Metadata metadata,
+    private int getDepCost(final String beanName, final Metadataa metadataa,
                            final Map<String, Integer> depCostPerBean) {
-        final Dependency[] dependencies = metadata.getDependencies();
+        final Dependency[] dependencies = metadataa.getDependencies();
         if (dependencies == null || dependencies.length == 0) {
             depCostPerBean.put(beanName, 0);
             return 0;
@@ -91,18 +92,18 @@ public class DependencyVerifier {
         dependencyNames.forEach(dependencyName -> verifyHierarchy(dependencyName, newParentBeanNames));
     }
 
-    private void resolveDependencies(final String beanName, final Metadata<?> metadata) {
-        final Dependency[] dependencies = metadata.getDependencies();
+    private void resolveDependencies(final String beanName, final Metadataa<?> metadataa) {
+        final Dependency[] dependencies = metadataa.getDependencies();
         if (dependencies == null || dependencies.length == 0) {
             return;
         }
-        final Metadata<?>[] dependencyMetadata = Stream.of(dependencies)
+        final Metadataa<?>[] dependencyMetadata = Stream.of(dependencies)
                 .map(dependency -> getDependencyMetadata(beanName, dependency))
-                .toArray(Metadata[]::new);
-        metadata.setDependencyMetadata(dependencyMetadata);
+                .toArray(Metadataa[]::new);
+        metadataa.setDependencyMetadata(dependencyMetadata);
     }
 
-    private Metadata<?> getDependencyMetadata(final String parentBeanName, final Dependency dependency) {
+    private Metadataa<?> getDependencyMetadata(final String parentBeanName, final Dependency dependency) {
         final Class<?> dependencyType = dependency.getType();
         final String propertyKey = dependency.getPropertyKey();
         if (propertyKey != null) {
@@ -119,14 +120,14 @@ public class DependencyVerifier {
         return getDependencyMetadata(dependency, parentBeanName, implNames);
     }
 
-    private Metadata<?> getPropertyMetadata(final Class<?> type, final String propertyKey) {
-        final PropertyResolver propertyResolver = Container.getInstance().getConfig().getPropertyResolver();
+    private Metadataa<?> getPropertyMetadata(final Class<?> type, final String propertyKey) {
+        final PropertyResolver propertyResolver = Containerr.getInstance().getConfig().getPropertyResolver();
         final Object propertyValue = propertyResolver.getValueForProperty(type, propertyKey);
-        return new PropertyMetadata(type, "", propertyKey, propertyValue);
+        return new PropertyMetadataa(type, "", propertyKey, propertyValue);
     }
 
-    private Metadata<?> getDependencyMetadata(final Dependency dependency, final String parentBeanName,
-                                           final Set<String> namesForDepType) {
+    private Metadataa<?> getDependencyMetadata(final Dependency dependency, final String parentBeanName,
+                                               final Set<String> namesForDepType) {
         final String dependencyName = dependency.getName();
         final Class<?> dependencyType = dependency.getType();
         if (namesForDepType == null || namesForDepType.isEmpty()) {
