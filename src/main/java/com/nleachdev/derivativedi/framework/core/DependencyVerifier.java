@@ -52,6 +52,7 @@ public class DependencyVerifier {
             final int depCost = getDepCost(beanName, metadata, depCostPerBean);
             metadata.setDependencyCost(depCost);
         });
+        logger.info("test");
     }
 
     private int getDepCost(final String beanName, final Metadata metadata,

@@ -13,7 +13,7 @@ public class BeanInstantiation {
         final List<Metadata<?>> metadata = metadataPerBeanName.values()
                 .stream()
                 .sorted(Metadata.COMPARATOR)
-                .collect(Collectors.toList());
+                .toList();
 
         metadata.forEach(this::instantiateBean);
     }

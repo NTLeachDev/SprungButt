@@ -111,16 +111,12 @@ public enum Container {
     }
 
     private static ClassScanner getClassScanner(final ScanningTarget scanningTarget) {
-        switch (scanningTarget) {
-            case DIRECTORY:
-                return new DirectoryClassScanner();
-            case JAR:
-                return new JarFileClassScanner();
-            case UNKNOWN:
-                return null;
-        }
+        return switch (scanningTarget) {
+            case DIRECTORY -> new DirectoryClassScanner();
+            case JAR -> new JarFileClassScanner();
+            case UNKNOWN -> null;
+        };
 
-        return null;
     }
 
     private static void clear() {
